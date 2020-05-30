@@ -42,7 +42,7 @@
  import net.minecraft.client.network.play.ClientPlayNetHandler;
  import net.minecraft.client.util.ClientRecipeBook;
  import net.minecraft.client.world.ClientWorld;
-@@ -31,24 +54,18 @@
+@@ -31,29 +54,24 @@
  import net.minecraft.entity.Pose;
  import net.minecraft.entity.item.BoatEntity;
  import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
@@ -72,7 +72,13 @@
  import net.minecraft.particles.ParticleTypes;
  import net.minecraft.potion.Effect;
  import net.minecraft.potion.EffectInstance;
-@@ -70,12 +87,15 @@
+ import net.minecraft.potion.Effects;
+ import net.minecraft.stats.StatisticsManager;
++import net.minecraft.stats.Stats;
+ import net.minecraft.tags.FluidTags;
+ import net.minecraft.tileentity.CommandBlockLogic;
+ import net.minecraft.tileentity.CommandBlockTileEntity;
+@@ -70,12 +88,15 @@
  import net.minecraft.util.math.AxisAlignedBB;
  import net.minecraft.util.math.BlockPos;
  import net.minecraft.util.math.MathHelper;
@@ -88,7 +94,7 @@
  
  public class ClientPlayerEntity extends AbstractClientPlayerEntity
  {
-@@ -98,6 +118,23 @@
+@@ -98,6 +119,23 @@
      public MovementInput movementInput;
      protected final Minecraft mc;
      protected int sprintToggleTimer;
@@ -112,7 +118,7 @@
      public int sprintingTicksLeft;
      public float renderArmYaw;
      public float renderArmPitch;
-@@ -127,6 +164,86 @@
+@@ -127,6 +165,86 @@
          this.ambientSoundHandlers.add(new UnderwaterAmbientSoundHandler(this, p_i745_1_.getSoundHandler()));
          this.ambientSoundHandlers.add(new BubbleColumnAmbientSoundHandler(this));
      }
@@ -199,7 +205,7 @@
  
      public boolean isGlowing()
      {
-@@ -135,6 +252,21 @@
+@@ -135,6 +253,21 @@
  
      public boolean attackEntityFrom(DamageSource source, float amount)
      {
@@ -221,7 +227,7 @@
          return false;
      }
  
-@@ -142,6 +274,8 @@
+@@ -142,6 +275,8 @@
      {
      }
  
@@ -230,7 +236,7 @@
      public boolean startRiding(Entity entityIn, boolean force)
      {
          if (!super.startRiding(entityIn, force))
-@@ -161,7 +295,10 @@
+@@ -161,7 +296,10 @@
                  this.rotationYaw = entityIn.rotationYaw;
                  this.setRotationYawHead(entityIn.rotationYaw);
              }
@@ -242,7 +248,7 @@
              return true;
          }
      }
-@@ -170,6 +307,10 @@
+@@ -170,6 +308,10 @@
      {
          super.stopRiding();
          this.rowingBoat = false;
@@ -253,7 +259,7 @@
      }
  
      public float getPitch(float partialTicks)
-@@ -280,6 +421,13 @@
+@@ -280,6 +422,13 @@
              }
  
              this.prevOnGround = this.onGround;
@@ -267,7 +273,7 @@
              this.autoJumpEnabled = this.mc.gameSettings.autoJump;
          }
      }
-@@ -294,10 +442,31 @@
+@@ -294,10 +443,31 @@
      public void sendChatMessage(String message)
      {
          this.connection.sendPacket(new CChatMessagePacket(message));
@@ -299,7 +305,7 @@
          super.swingArm(hand);
          this.connection.sendPacket(new CAnimateHandPacket(hand));
      }
-@@ -551,7 +720,24 @@
+@@ -551,7 +721,24 @@
  
      public void playSound(SoundEvent soundIn, float volume, float pitch)
      {
@@ -325,7 +331,7 @@
      }
  
      public void playSound(SoundEvent p_213823_1_, SoundCategory p_213823_2_, float p_213823_3_, float p_213823_4_)
-@@ -730,6 +916,9 @@
+@@ -730,6 +917,9 @@
          boolean flag1 = this.movementInput.field_228350_h_;
          boolean flag2 = this.func_223110_ee();
          this.movementInput.func_225607_a_(this.func_228354_I_());
@@ -335,7 +341,7 @@
          this.mc.getTutorial().handleMovement(this.movementInput);
  
          if (this.isHandActive() && !this.isPassenger())
-@@ -748,12 +937,17 @@
+@@ -748,12 +938,17 @@
              this.movementInput.jump = true;
          }
  
@@ -359,7 +365,7 @@
          }
  
          boolean flag4 = (float)this.getFoodStats().getFoodLevel() > 6.0F || this.abilities.allowFlying;
-@@ -915,6 +1109,9 @@
+@@ -915,6 +1110,9 @@
          }
  
          super.livingTick();
@@ -369,7 +375,7 @@
  
          if (this.onGround && this.abilities.isFlying && !this.mc.playerController.isSpectatorMode())
          {
-@@ -1008,12 +1205,58 @@
+@@ -1008,12 +1206,58 @@
          return super.removeActivePotionEffect(potioneffectin);
      }
  
@@ -432,7 +438,7 @@
      }
  
      public boolean isAutoJumpEnabled()
-@@ -1031,13 +1274,17 @@
+@@ -1031,13 +1275,17 @@
              float f = this.getAIMoveSpeed();
              float f1 = (float)vec3d2.lengthSquared();
  
@@ -452,7 +458,7 @@
                  vec3d2 = new Vec3d((double)(f2 * f5 - f3 * f4), vec3d2.y, (double)(f3 * f5 + f2 * f4));
                  f1 = (float)vec3d2.lengthSquared();
  
-@@ -1220,4 +1467,406 @@
+@@ -1220,4 +1468,459 @@
              return this.eyesInWaterPlayer;
          }
      }
@@ -857,5 +863,58 @@
 +    public void stopActiveHand() {
 +    	NetworkHelper.sendActiveHand((byte) this.getActiveHand().ordinal());
 +    	super.stopActiveHand();
++    }
++
++    // this.rotationYaw is set to the yaw rotation of the right controller
++    // at some point. This makes sprint jumping jump in the direction of the right
++    // right controller. This is not desirable.
++    @Override
++    public void jump()
++    {
++        // LivingEntity.jump() override
++        float f = this.getJumpUpwardsMotion();
++
++        if (this.isPotionActive(Effects.JUMP_BOOST))
++        {
++            f += 0.1F * (float)(this.getActivePotionEffect(Effects.JUMP_BOOST).getAmplifier() + 1);
++        }
++
++        Vec3d vec3d = this.getMotion();
++        this.setMotion(vec3d.x, (double)f, vec3d.z);
++
++        if (this.isSprinting())
++        {
++            //float f1 = this.rotationYaw * ((float)Math.PI / 180F);
++            float f1 = 0;
++            switch (mc.vrSettings.vrFreeMoveMode)
++            {
++                case VRSettings.FREEMOVE_CONTROLLER:
++                    f1 = mc.vrPlayer.vrdata_world_pre.getController(1).getYaw() * PIOVER180;	
++                    break;
++                case VRSettings.FREEMOVE_HMD:
++                    f1 = mc.vrPlayer.vrdata_world_pre.hmd.getYaw() * PIOVER180;
++                    break;
++                case VRSettings.FREEMOVE_RUNINPLACE:
++                    f1 = (float)mc.runTracker.getYaw() * PIOVER180;
++                    f1 = f1 * (float)mc.runTracker.getSpeed();
++                    break;
++            }
++
++            this.setMotion(this.getMotion().add((double)(-MathHelper.sin(f1) * 0.2F), 0.0D, (double)(MathHelper.cos(f1) * 0.2F)));
++        }
++
++        this.isAirBorne = true;
++
++        // PlayerEntity.jump() override
++        this.addStat(Stats.JUMP);
++
++        if (this.isSprinting())
++        {
++            this.addExhaustion(0.2F);
++        }
++        else
++        {
++            this.addExhaustion(0.05F);
++        }
 +    }
  }
