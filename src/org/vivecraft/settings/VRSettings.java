@@ -121,6 +121,7 @@ public class VRSettings
     public float vrWorldRotation = 0f;
 	public float vrWorldRotationCached;
     public float vrWorldRotationIncrement = 45f;
+    public int vrWorldRotationIncrementMultiplier = 10;
     public float xSensitivity=1f;
     public float ySensitivity=1f;
     public float keyholeX=15;
@@ -531,6 +532,10 @@ public class VRSettings
                     if (optionTokens[0].equals("vrWorldRotationIncrement"))
                     {
                         this.vrWorldRotationIncrement =  this.parseFloat(optionTokens[1]);
+                    }
+                    if (optionTokens[0].equals("vrWorldRotationIncrementMultiplier"))
+                    {
+                        this.vrWorldRotationIncrementMultiplier = Integer.parseInt(optionTokens[1]);
                     }
                     if (optionTokens[0].equals("vrFixedCamposX"))
                     {
@@ -1072,7 +1077,9 @@ public class VRSettings
             case WORLD_ROTATION:
 	            return var4 + String.format("%.0f", this.vrWorldRotation);
             case WORLD_ROTATION_INCREMENT:
-	            return var4 + (this.vrWorldRotationIncrement == 0 ? "Smooth" : String.format("%.0f", this.vrWorldRotationIncrement));
+                return var4 + (this.vrWorldRotationIncrement == 0 ? "Smooth" : String.format("%.0f", this.vrWorldRotationIncrement));
+            case WORLD_ROTATION_INCREMENT_MULTIPLIER:
+                return var4 + this.vrWorldRotationIncrementMultiplier;
             case TOUCH_HOTBAR:
             	return this.vrTouchHotbar ? var4 + "ON" : var4 + "OFF";
             case PLAY_MODE_SEATED:
@@ -1261,7 +1268,9 @@ public class VRSettings
             	if(vrWorldRotationIncrement == 45f) return 2;
             	if(vrWorldRotationIncrement == 90f) return 3;
             	if(vrWorldRotationIncrement == 180f) return 4;
-            	return 0;
+                return 0;
+            case WORLD_ROTATION_INCREMENT_MULTIPLIER:
+                return vrWorldRotationIncrementMultiplier;
             case MONO_FOV:
             	return (float) this.mc.gameSettings.fov;
 			case MIXED_REALITY_FOV:
@@ -1658,6 +1667,8 @@ public class VRSettings
             	if(par2 == 3f) this.vrWorldRotationIncrement =  90f;
             	if(par2 == 4f) this.vrWorldRotationIncrement =  180f;
                 break;
+            case WORLD_ROTATION_INCREMENT_MULTIPLIER:
+                this.vrWorldRotationIncrementMultiplier=(int)par2;
             case X_SENSITIVITY:
                 this.xSensitivity=par2;
                 break;
@@ -1777,6 +1788,7 @@ public class VRSettings
             var5.println("worldScale:" + this.vrWorldScale);
             var5.println("worldRotation:" + this.vrWorldRotation);
             var5.println("vrWorldRotationIncrement:" + this.vrWorldRotationIncrement);
+            var5.println("vrWorldRotationIncrementMultiplier:" + this.vrWorldRotationIncrementMultiplier);
             var5.println("vrFixedCamposX:" + this.vrFixedCamposX);
             var5.println("vrFixedCamposY:" + this.vrFixedCamposY);
             var5.println("vrFixedCamposZ:" + this.vrFixedCamposZ);
@@ -2213,6 +2225,11 @@ public class VRSettings
         WORLD_ROTATION_INCREMENT("Rotation Increment", true, false,-1, 4, 1, new String[] {
                 "How many degrees to rotate when",
                 "rotating the world."             
+        }),
+        WORLD_ROTATION_INCREMENT_MULTIPLIER("Smooth Multiplier", true, false, 1, 50, 1, new String[] {
+                "A smooth rotation multiplier that",
+                "applies to Smooth Rotation Increment.",
+                "The default is 10."
         }),
         TOUCH_HOTBAR("Touch Hotbar Enabled", false, true,new String[] {
                 "If enabled allow you to touch the hotbar with",
