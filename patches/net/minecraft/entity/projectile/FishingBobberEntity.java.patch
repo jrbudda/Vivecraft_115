@@ -155,12 +155,18 @@
          }
          else
          {
-@@ -523,6 +580,11 @@
+@@ -523,6 +580,17 @@
          }
      }
  
++    //Forge
 +    public void remove(boolean keepData) {
-+       this.remove();
++       this.removed = true;
++       
++       if (this.angler != null)
++       {
++           this.angler.fishingBobber = null;
++       }
 +       //TODO: figure out how to call Forge's remove(boolean) on super.
 +    }
 +    

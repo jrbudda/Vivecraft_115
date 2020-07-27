@@ -765,11 +765,11 @@ public class OpenVRStereoRenderer
 	
 		if(mc.player != null) {
 			if (TelescopeTracker.isTelescope(mc.player.getHeldItemMainhand())) {
-				if(TelescopeTracker.isViewing(mc.player, 0))
+				if(TelescopeTracker.isViewing(0))
 					passes.add(RenderPass.SCOPER);
 			}		
 			if (TelescopeTracker.isTelescope(mc.player.getHeldItemOffhand())) {
-				if(TelescopeTracker.isViewing(mc.player, 1))
+				if(TelescopeTracker.isViewing(1))
 					passes.add(RenderPass.SCOPEL);
 			}	
 		}

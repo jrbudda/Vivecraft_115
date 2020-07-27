@@ -152,7 +152,7 @@ public class SwingTracker extends Tracker{
             		weaponLength = 0.7f;
             		tool = true;
             } else if (tool){
-            	entityReachAdd = 1.f;
+            	entityReachAdd = 1.0f;
             	weaponLength = 0.5f;
         		tool = true;
             } else if (item !=null){

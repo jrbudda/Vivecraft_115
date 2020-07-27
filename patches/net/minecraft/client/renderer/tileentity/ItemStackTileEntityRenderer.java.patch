@@ -19,56 +19,87 @@
  
  public class ItemStackTileEntityRenderer
  {
-@@ -143,6 +146,13 @@
+@@ -143,35 +146,54 @@
          }
          else
          {
-+        	//Vivecraft
-+            float a = 1;
-+            if(Minecraft.getInstance().getItemRenderer().isfphand) {
-+         	   a = SwingTracker.getItemFade(Minecraft.getInstance().player, itemStackIn);
-+            }
-+            //
-+            
-             if (item == Items.SHIELD)
-             {
-                 boolean flag = itemStackIn.getChildTag("BlockEntityTag") != null;
-@@ -150,7 +160,13 @@
-                 matrixStackIn.scale(1.0F, -1.0F, -1.0F);
-                 Material material = flag ? ModelBakery.LOCATION_SHIELD_BASE : ModelBakery.LOCATION_SHIELD_NO_PATTERN;
-                 IVertexBuilder ivertexbuilder = material.getSprite().wrapBuffer(ItemRenderer.getBuffer(bufferIn, this.modelShield.getRenderType(material.getAtlasLocation()), false, itemStackIn.hasEffect()));
+-            if (item == Items.SHIELD)
+-            {
+-                boolean flag = itemStackIn.getChildTag("BlockEntityTag") != null;
+-                matrixStackIn.push();
+-                matrixStackIn.scale(1.0F, -1.0F, -1.0F);
+-                Material material = flag ? ModelBakery.LOCATION_SHIELD_BASE : ModelBakery.LOCATION_SHIELD_NO_PATTERN;
+-                IVertexBuilder ivertexbuilder = material.getSprite().wrapBuffer(ItemRenderer.getBuffer(bufferIn, this.modelShield.getRenderType(material.getAtlasLocation()), false, itemStackIn.hasEffect()));
 -                this.modelShield.func_228294_b_().render(matrixStackIn, ivertexbuilder, combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, 1.0F);
-+                
-+                //Vivecraft
-+                if(a<1)
-+                	ivertexbuilder = material.getSprite().wrapBuffer(ItemRenderer.getBuffer(bufferIn, RenderType.getEntityTranslucent(material.getAtlasLocation()), false, itemStackIn.hasEffect()));
-+                //
-+                
-+                this.modelShield.func_228294_b_().render(matrixStackIn, ivertexbuilder, combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, a);
- 
-                 if (flag)
-                 {
-@@ -159,7 +175,7 @@
-                 }
-                 else
-                 {
+-
+-                if (flag)
+-                {
+-                    List<Pair<BannerPattern, DyeColor>> list = BannerTileEntity.func_230138_a_(ShieldItem.getColor(itemStackIn), BannerTileEntity.func_230139_a_(itemStackIn));
+-                    BannerTileEntityRenderer.func_230180_a_(matrixStackIn, bufferIn, combinedLightIn, combinedOverlayIn, this.modelShield.func_228293_a_(), material, false, list);
+-                }
+-                else
+-                {
 -                    this.modelShield.func_228293_a_().render(matrixStackIn, ivertexbuilder, combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, 1.0F);
-+                    this.modelShield.func_228293_a_().render(matrixStackIn, ivertexbuilder, combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, a);
-                 }
- 
-                 matrixStackIn.pop();
-@@ -169,7 +185,13 @@
-                 matrixStackIn.push();
-                 matrixStackIn.scale(1.0F, -1.0F, -1.0F);
-                 IVertexBuilder ivertexbuilder1 = ItemRenderer.getBuffer(bufferIn, this.trident.getRenderType(TridentModel.TEXTURE_LOCATION), false, itemStackIn.hasEffect());
+-                }
+-
+-                matrixStackIn.pop();
+-            }
+-            else if (item == Items.TRIDENT)
+-            {
+-                matrixStackIn.push();
+-                matrixStackIn.scale(1.0F, -1.0F, -1.0F);
+-                IVertexBuilder ivertexbuilder1 = ItemRenderer.getBuffer(bufferIn, this.trident.getRenderType(TridentModel.TEXTURE_LOCATION), false, itemStackIn.hasEffect());
 -                this.trident.render(matrixStackIn, ivertexbuilder1, combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, 1.0F);
-+              
-+                //Vivecraft
-+                if(a<1)
-+                	ivertexbuilder1 = ItemRenderer.getBuffer(bufferIn, RenderType.getEntityTranslucent(TridentModel.TEXTURE_LOCATION), false, itemStackIn.hasEffect());
-+                //
-+                
-+                this.trident.render(matrixStackIn, ivertexbuilder1, combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, a);
-                 matrixStackIn.pop();
-             }
+-                matrixStackIn.pop();
+-            }
++        	//Vivecraft
++        	float a = 1;
++        	if(Minecraft.getInstance().getItemRenderer().isfphand) {
++        		a = SwingTracker.getItemFade(Minecraft.getInstance().player, itemStackIn);
++        	}
++        	//
++
++        	if (item == Items.SHIELD)
++        	{
++        		boolean flag = itemStackIn.getChildTag("BlockEntityTag") != null;
++        		matrixStackIn.push();
++        		matrixStackIn.scale(1.0F, -1.0F, -1.0F);
++        		Material material = flag ? ModelBakery.LOCATION_SHIELD_BASE : ModelBakery.LOCATION_SHIELD_NO_PATTERN;
++        		IVertexBuilder ivertexbuilder = material.getSprite().wrapBuffer(ItemRenderer.getBuffer(bufferIn, this.modelShield.getRenderType(material.getAtlasLocation()), false, itemStackIn.hasEffect()));
++
++        		//Vivecraft
++        		if(a<1)
++        			ivertexbuilder = material.getSprite().wrapBuffer(ItemRenderer.getBuffer(bufferIn, RenderType.getEntityTranslucent(material.getAtlasLocation()), false, itemStackIn.hasEffect()));
++        		//
++
++        		this.modelShield.func_228294_b_().render(matrixStackIn, ivertexbuilder, combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, a);
++
++        		if (flag)
++        		{
++        			List<Pair<BannerPattern, DyeColor>> list = BannerTileEntity.func_230138_a_(ShieldItem.getColor(itemStackIn), BannerTileEntity.func_230139_a_(itemStackIn));
++        			BannerTileEntityRenderer.func_230180_a_(matrixStackIn, bufferIn, combinedLightIn, combinedOverlayIn, this.modelShield.func_228293_a_(), material, false, list);
++        		}
++        		else
++        		{
++        			this.modelShield.func_228293_a_().render(matrixStackIn, ivertexbuilder, combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, a);
++        		}
++
++        		matrixStackIn.pop();
++        	}
++        	else if (item == Items.TRIDENT)
++        	{
++        		matrixStackIn.push();
++        		matrixStackIn.scale(1.0F, -1.0F, -1.0F);
++        		IVertexBuilder ivertexbuilder1 = ItemRenderer.getBuffer(bufferIn, this.trident.getRenderType(TridentModel.TEXTURE_LOCATION), false, itemStackIn.hasEffect());
++
++        		//Vivecraft
++        		if(a<1)
++        			ivertexbuilder1 = ItemRenderer.getBuffer(bufferIn, RenderType.getEntityTranslucent(TridentModel.TEXTURE_LOCATION), false, itemStackIn.hasEffect());
++        		//
++
++        		this.trident.render(matrixStackIn, ivertexbuilder1, combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, a);
++        		matrixStackIn.pop();
++        	}
          }
+     }
+ }

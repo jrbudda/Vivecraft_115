@@ -1,6 +1,6 @@
 --- a/net/minecraft/client/renderer/FirstPersonRenderer.java
 +++ b/net/minecraft/client/renderer/FirstPersonRenderer.java
-@@ -2,24 +2,69 @@
+@@ -2,24 +2,70 @@
  
  import com.google.common.base.MoreObjects;
  import com.mojang.blaze3d.matrix.MatrixStack;
@@ -28,6 +28,7 @@
 +
 +import net.minecraft.block.BambooBlock;
 +import net.minecraft.block.Block;
++import net.minecraft.block.BlockState;
 +import net.minecraft.block.RedstoneTorchBlock;
 +import net.minecraft.block.TorchBlock;
  import net.minecraft.client.Minecraft;
@@ -70,7 +71,7 @@
  import net.minecraft.world.storage.MapData;
  import net.optifine.Config;
  import net.optifine.reflect.Reflector;
-@@ -27,8 +72,8 @@
+@@ -27,8 +73,8 @@
  
  public class FirstPersonRenderer
  {
@@ -81,7 +82,7 @@
      private final Minecraft mc;
      private ItemStack itemStackMainHand = ItemStack.EMPTY;
      private ItemStack itemStackOffHand = ItemStack.EMPTY;
-@@ -38,12 +83,21 @@
+@@ -38,12 +84,21 @@
      private float prevEquippedProgressOffHand;
      private final EntityRendererManager renderManager;
      private final ItemRenderer itemRenderer;
@@ -104,7 +105,7 @@
      }
  
      public void renderItemSide(LivingEntity livingEntityIn, ItemStack itemStackIn, ItemCameraTransforms.TransformType transformTypeIn, boolean leftHand, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int combinedLightIn)
-@@ -62,6 +116,7 @@
+@@ -62,6 +117,7 @@
          return f;
      }
  
@@ -112,7 +113,7 @@
      private void renderArm(MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int combinedLightIn, HandSide side)
      {
          this.mc.getTextureManager().bindTexture(this.mc.player.getLocationSkin());
-@@ -85,6 +140,7 @@
+@@ -85,6 +141,7 @@
          matrixStackIn.pop();
      }
  
@@ -120,7 +121,7 @@
      private void renderMapFirstPersonSide(MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int combinedLightIn, float equippedProgress, HandSide handIn, float swingProgress, ItemStack stack)
      {
          float f = handIn == HandSide.RIGHT ? 1.0F : -1.0F;
-@@ -112,6 +168,7 @@
+@@ -112,6 +169,7 @@
          matrixStackIn.pop();
      }
  
@@ -128,7 +129,7 @@
      private void renderMapFirstPerson(MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int combinedLightIn, float pitch, float equippedProgress, float swingProgress)
      {
          float f = MathHelper.sqrt(swingProgress);
-@@ -137,6 +194,7 @@
+@@ -137,6 +195,7 @@
          this.renderMapFirstPerson(matrixStackIn, bufferIn, combinedLightIn, this.itemStackMainHand);
      }
  
@@ -136,7 +137,7 @@
      private void renderMapFirstPerson(MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int combinedLightIn, ItemStack stack)
      {
          matrixStackIn.rotate(Vector3f.YP.rotationDegrees(180.0F));
-@@ -162,33 +220,49 @@
+@@ -162,33 +221,49 @@
      {
          boolean flag = side != HandSide.LEFT;
          float f = flag ? 1.0F : -1.0F;
@@ -211,7 +212,7 @@
      }
  
      private void transformEatFirstPerson(MatrixStack matrixStackIn, float partialTicks, HandSide handIn, ItemStack stack)
-@@ -210,6 +284,7 @@
+@@ -210,6 +285,7 @@
          matrixStackIn.rotate(Vector3f.ZP.rotationDegrees((float)i * f3 * 30.0F));
      }
  
@@ -219,7 +220,7 @@
      private void transformFirstPerson(MatrixStack matrixStackIn, HandSide handIn, float swingProgress)
      {
          int i = handIn == HandSide.RIGHT ? 1 : -1;
-@@ -220,6 +295,44 @@
+@@ -220,6 +296,44 @@
          matrixStackIn.rotate(Vector3f.XP.rotationDegrees(f1 * -80.0F));
          matrixStackIn.rotate(Vector3f.YP.rotationDegrees((float)i * -45.0F));
      }
@@ -264,7 +265,7 @@
  
      private void transformSideFirstPerson(MatrixStack matrixStackIn, HandSide handIn, float equippedProg)
      {
-@@ -227,6 +340,7 @@
+@@ -227,6 +341,7 @@
          matrixStackIn.translate((double)((float)i * 0.56F), (double)(-0.52F + equippedProg * -0.6F), (double) - 0.72F);
      }
  
@@ -272,7 +273,7 @@
      public void renderItemInFirstPerson(float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer.Impl bufferIn, ClientPlayerEntity playerEntityIn, int combinedLightIn)
      {
          float f = playerEntityIn.getSwingProgress(partialTicks);
-@@ -304,184 +418,382 @@
+@@ -304,184 +419,404 @@
          bufferIn.finish();
      }
  
@@ -296,7 +297,10 @@
 +
 +        	if(BowTracker.isBow(stack) && mc.bowTracker.isActive((ClientPlayerEntity) player))
 +        		shouldrenderhand = false;
-+
++        	
++        	if(TelescopeTracker.isTelescope(stack) && ((handIn == Hand.OFF_HAND && mc.currentPass == RenderPass.SCOPEL) || (handIn == Hand.MAIN_HAND && mc.currentPass == RenderPass.SCOPER)))
++        		shouldrenderhand = false;
++        	
 +     //   	shouldrenderhand = true; //temp
 +        	
 +            if (shouldrenderhand && !player.isInvisible())
@@ -550,7 +554,7 @@
 +            		translateX+= -0.0225;
 +            		scale = 1.0f;
 +            	}
-+            	else if(rendertype == VivecraftItemRendering.Bow_Roomscale) {
++            	else if(rendertype == VivecraftItemRendering.Bow_Roomscale_Drawing) {
 +            		//here there be dragons
 +
 +            		//
@@ -642,15 +646,19 @@
 +            		isFilledMap = true;
 +            		rotation = Vector3f.XP.rotationDegrees(-45);
 +            		translateX = 0;
-+            		translateY = .14;
-+            		translateZ = -.05;
-+            		scale = 0.5;
++            		translateY = .16;
++            		translateZ = -.075;
++            		scale = 0.75;
 +            	}
 +            	else if(rendertype == VivecraftItemRendering.Noms) {
 +
-+            		long t = this.mc.player.getItemInUseCount();
-+            		translateZ += 0.006D*Math.sin(t);
-+            		translateZ +=0.02f;
++    				long t = this.mc.player.getItemInUseCount();
++    				rotation = Vector3f.ZP.rotationDegrees(180);
++    				rotation.multiply(Vector3f.XP.rotationDegrees(-135));
++    				translateZ += 0.006D*Math.sin(t);
++    				translateZ +=0.02f;
++    				translateX +=.08f;
++    				scale = 0.4f;
 +            	}
 +            	else if(rendertype == VivecraftItemRendering.Item || rendertype == VivecraftItemRendering.Block_Item) {
 +
@@ -791,11 +799,12 @@
 +
 +            	}
 +            	else if(rendertype == VivecraftItemRendering.Telescope) {
-+            		prerotation = Vector3f.XP.rotationDegrees(-90);
++            		prerotation = Vector3f.XP.rotationDegrees(0);          		
 +            		rotation = Vector3f.XP.rotationDegrees(0);
-+            		translateZ =0.1;
-+            		translateY =0.05f;
-+            		translateX =0;
++            		translateZ =0;
++            		translateY =0;
++            		translateX =-0;
++            		//scale = 0.25;
 +            	}
 +
 +    	    	if(player.swingingHand == handIn)
@@ -811,9 +820,23 @@
 +            	if(isFilledMap)  {
 +            		RenderSystem.disableCull(); //dont. get. me. started.
 +            		this.renderMapFirstPerson(matrixStackIn, bufferIn, combinedLightIn, stack);            		
-+            	} else if (rendertype == VivecraftItemRendering.Telescope)
++            	} else if (rendertype == VivecraftItemRendering.Telescope) {
++            		if(mc.currentPass != RenderPass.SCOPEL && mc.currentPass != RenderPass.SCOPER) {
++            			matrixStackIn.push();
++            			matrixStackIn.translate(-.1325f, 0.25f, 0.08f);
++            			matrixStackIn.rotate(Vector3f.XP.rotationDegrees(180));
++            			matrixStackIn.scale(.25f, 1.5f, .25f);
++            			mc.getBlockRendererDispatcher().getBlockModelRenderer().renderModelBrightnessColor(matrixStackIn.getLast(), bufferIn.getBuffer(Atlases.getSolidBlockType()), (BlockState)null, mc.getModelManager().getModel(TelescopeTracker.scopeModel), 0.5F, 0.5F, 1.0F, combinedLightIn, OverlayTexture.NO_OVERLAY);
++            			matrixStackIn.pop();
++            		}
++            		matrixStackIn.push();
++            		matrixStackIn.translate(0, 0.2501f, -0.053f);
++            		matrixStackIn.rotate(Vector3f.XP.rotationDegrees(90));
++            		matrixStackIn.rotate(Vector3f.YP.rotationDegrees(180));
++            		matrixStackIn.rotate(Vector3f.ZP.rotationDegrees(180));
 +            		mc.gameRenderer.DrawScopeFB(matrixStackIn, handIn == Hand.MAIN_HAND ? 0 :1);
-+            	else
++            		matrixStackIn.pop();
++            	}else
 +            		this.renderItemSide(player, stack, flag ? ItemCameraTransforms.TransformType.FIRST_PERSON_RIGHT_HAND : mirror ? ItemCameraTransforms.TransformType.FIRST_PERSON_LEFT_HAND : ItemCameraTransforms.TransformType.FIRST_PERSON_RIGHT_HAND, mirror, matrixStackIn, bufferIn, combinedLightIn);
 +            	
 +        		this.itemRenderer.isfphand = false;
@@ -823,7 +846,7 @@
              matrixStackIn.pop();
          }
      }
-@@ -555,4 +867,100 @@
+@@ -555,4 +890,100 @@
              this.equippedProgressOffHand = 0.0F;
          }
      }

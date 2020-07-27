@@ -52,7 +52,7 @@
  
      public IngameGui(Minecraft p_i232_1_)
      {
-@@ -146,32 +158,41 @@
+@@ -146,32 +158,40 @@
          FontRenderer fontrenderer = this.getFontRenderer();
          RenderSystem.enableBlend();
  
@@ -86,7 +86,6 @@
          if (this.mc.gameSettings.thirdPersonView == 0 && itemstack.getItem() == Blocks.CARVED_PUMPKIN.asItem())
          {
 -            this.renderPumpkinOverlay();
-+        	mc.pumpkineffect = 1f;
 +            //this.renderPumpkinOverlay();
          }
 +        //
@@ -114,7 +113,7 @@
  
          if (this.mc.playerController.getCurrentGameType() == GameType.SPECTATOR)
          {
-@@ -188,9 +209,13 @@
+@@ -188,9 +208,13 @@
              this.mc.getTextureManager().bindTexture(GUI_ICONS_LOCATION);
              RenderSystem.enableBlend();
              RenderSystem.enableAlphaTest();
@@ -130,18 +129,7 @@
              this.mc.getProfiler().startSection("bossHealth");
              this.overlayBoss.render();
              this.mc.getProfiler().endSection();
-@@ -223,6 +248,10 @@
-             {
-                 this.spectatorGui.renderSelectedItem();
-             }
-+            
-+            //Vivecraft
-+            renderViveHudIcons();
-+            //
-         }
- 
-         if (this.mc.player.getSleepTimer() > 0)
-@@ -276,7 +305,9 @@
+@@ -276,7 +300,9 @@
                      RenderSystem.pushMatrix();
                      RenderSystem.translatef((float)(this.scaledWidth / 2), (float)(this.scaledHeight - 68), 0.0F);
                      RenderSystem.enableBlend();
@@ -152,7 +140,7 @@
                      int k1 = 16777215;
  
                      if (this.animateOverlayMessageColor)
-@@ -318,7 +349,9 @@
+@@ -318,7 +344,9 @@
                      RenderSystem.pushMatrix();
                      RenderSystem.translatef((float)(this.scaledWidth / 2), (float)(this.scaledHeight / 2), 0.0F);
                      RenderSystem.enableBlend();
@@ -163,7 +151,7 @@
                      RenderSystem.pushMatrix();
                      RenderSystem.scalef(4.0F, 4.0F, 4.0F);
                      int l1 = j1 << 24 & -16777216;
-@@ -365,9 +398,30 @@
+@@ -365,9 +393,30 @@
              {
                  this.renderScoreboard(scoreobjective1);
              }
@@ -195,7 +183,7 @@
              RenderSystem.disableAlphaTest();
              RenderSystem.pushMatrix();
              RenderSystem.translatef(0.0F, (float)(this.scaledHeight - 48), 0.0F);
-@@ -377,7 +431,7 @@
+@@ -377,7 +426,7 @@
              RenderSystem.popMatrix();
              scoreobjective1 = scoreboard.getObjectiveInDisplaySlot(0);
  
@@ -204,7 +192,7 @@
              {
                  this.overlayPlayerList.setVisible(true);
                  this.overlayPlayerList.render(this.scaledWidth, scoreboard, scoreobjective1);
-@@ -594,6 +648,9 @@
+@@ -594,6 +643,9 @@
              int k = 182;
              int l = 91;
              this.setBlitOffset(-90);
@@ -214,7 +202,7 @@
              this.blit(i - 91, this.scaledHeight - 22, 0, 0, 182, 22);
              this.blit(i - 91 - 1 + playerentity.inventory.currentItem * 20, this.scaledHeight - 22 - 1, 0, 22, 24, 22);
  
-@@ -612,7 +669,9 @@
+@@ -612,7 +664,9 @@
              this.setBlitOffset(j);
              RenderSystem.enableRescaleNormal();
              RenderSystem.enableBlend();
@@ -225,7 +213,18 @@
              CustomItems.setRenderOffHand(false);
  
              for (int i1 = 0; i1 < 9; ++i1)
-@@ -766,7 +825,9 @@
+@@ -663,6 +717,10 @@
+ 
+             RenderSystem.disableRescaleNormal();
+             RenderSystem.disableBlend();
++
++            //Vivecraft
++            renderViveHudIcons();
++            //
+         }
+     }
+ 
+@@ -766,7 +824,9 @@
              {
                  RenderSystem.pushMatrix();
                  RenderSystem.enableBlend();
@@ -236,7 +235,7 @@
                  fill(i - 2, j - 2, i + this.getFontRenderer().getStringWidth(s) + 2, j + 9 + 2, this.mc.gameSettings.getChatBackgroundColor(0));
                  FontRenderer fontrenderer = null;
  
-@@ -1199,6 +1260,7 @@
+@@ -1199,6 +1259,7 @@
          }
      }
  
@@ -244,7 +243,7 @@
      private void renderPumpkinOverlay()
      {
          RenderSystem.disableDepthTest();
-@@ -1230,6 +1292,8 @@
+@@ -1230,6 +1291,8 @@
          }
      }
  
@@ -253,7 +252,7 @@
      private void renderVignette(Entity entityIn)
      {
          if (!Config.isVignetteEnabled())
-@@ -1282,6 +1346,7 @@
+@@ -1282,6 +1345,7 @@
          }
      }
  
@@ -261,7 +260,7 @@
      private void renderPortal(float timeInPortal)
      {
          if (timeInPortal < 1.0F)
-@@ -1512,4 +1577,80 @@
+@@ -1512,4 +1576,80 @@
      {
          this.overlayDebug.resetChunk();
      }

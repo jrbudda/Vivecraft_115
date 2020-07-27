@@ -348,7 +348,7 @@
 +        //Forge
 +        Object event = Reflector.newInstance(Reflector.PlayerSPPushOutOfBlocksEvent_Constructor, this); 
 +        // 
-+        if (!this.noClip || event == null || !Reflector.postForgeBusEvent(event)) {
++        if (!this.noClip && !Reflector.postForgeBusEvent(event)) {
 +        	double y= this.getPosY() + 0.5f;
 +        	if(event!=null)
 +        		y = Reflector.callDouble(event, Reflector.PlayerSPPushOutOfBlocksEvent_getMinY);

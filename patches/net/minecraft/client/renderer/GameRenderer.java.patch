@@ -442,7 +442,7 @@
 -                        resourceloadprogressgui.update();
 -                    }
 -                }
- 
+-
 -                this.guiLoadingVisible = this.mc.loadingGui != null;
 -            }
 -
@@ -495,7 +495,7 @@
 -                    throw new ReportedException(crashreport1);
 -                }
 -            }
--
+ 
 -            this.lightmapTexture.setAllowed(true);
 -        }
 -
@@ -725,7 +725,7 @@
              matrixstack.scale(f7, -f7, f7);
              matrixstack.rotate(Vector3f.YP.rotationDegrees(900.0F * MathHelper.abs(MathHelper.sin(f4))));
              matrixstack.rotate(Vector3f.XP.rotationDegrees(6.0F * MathHelper.cos(f * 8.0F)));
-@@ -1317,4 +1347,2326 @@
+@@ -1317,4 +1347,2345 @@
      {
          return this.overlayTexture;
      }
@@ -981,7 +981,13 @@
 +  	  		RenderSystem.translated((mc.vrPlayer.vrdata_world_render.origin.x - eye.x), (mc.vrPlayer.vrdata_world_render.origin.y - eye.y), (mc.vrPlayer.vrdata_world_render.origin.z - eye.z));
 +
 +  			if (mc.menuWorldRenderer != null && mc.menuWorldRenderer.isReady()) {
-+  				renderTechjarsAwesomeMainMenuRoom();
++  			    try {
++                    renderTechjarsAwesomeMainMenuRoom();
++                } catch (Exception e) {
++  			        System.out.println("Error rendering main menu world, unloading to prevent more errors");
++  			        e.printStackTrace();
++  			        mc.menuWorldRenderer.destroy();
++                }
 +  			} else {
 +  				renderJrbuddasAwesomeMainMenuRoom();
 +  			}
@@ -1148,6 +1154,15 @@
 +	  				{
 +	  					//RenderSystem.defaultAlphaFunc();
 +	  					//this.renderItemActivation(this.mc.getMainWindow().getScaledWidth(), this.mc.getMainWindow().getScaledHeight(), partialTicks);
++
++                        if (Reflector.ForgeIngameGui.exists()) {
++                            // ensure all this forge crap is disabled
++                            Reflector.ForgeIngameGui_renderVignette.setValue(false);
++                            Reflector.ForgeIngameGui_renderHelmet.setValue(false);
++                            Reflector.ForgeIngameGui_renderPortal.setValue(false);
++                            Reflector.ForgeIngameGui_renderCrosshairs.setValue(false);
++                        }
++
 +	  					if(!Main.viewonly)
 +	  						this.mc.ingameGUI.renderGameOverlay(partialTicks);
 +	
@@ -2379,11 +2394,16 @@
 +			RenderSystem.enableDepthTest();
 +			RenderSystem.enableAlphaTest();
 +			lightmapTexture.disableLightmap();
++			RenderSystem.disableTexture();
 +			if(i==0)
 +				mc.stereoProvider.telescopeFramebufferR.bindFramebufferTexture();
 +			else
 +				mc.stereoProvider.telescopeFramebufferL.bindFramebufferTexture();			
-+			drawSizedQuad(720, 720, 0.10f * mc.vrPlayer.vrdata_world_render.worldScale);
++			drawSizedQuad(720, 720, 0.075f * mc.vrPlayer.vrdata_world_render.worldScale, new Color(0,0,0,1));
++			RenderSystem.enableTexture();
++			float alpha = TelescopeTracker.viewPercent(i);
++			RenderSystem.enableBlend();
++			drawSizedQuad(720, 720, 0.075f * mc.vrPlayer.vrdata_world_render.worldScale, new Color(1,1,1,alpha));
 +			RenderSystem.enableBlend();
 +			RenderSystem.defaultAlphaFunc();
 +			lightmapTexture.enableLightmap();
@@ -2568,13 +2588,12 @@
 +        if (shaders)
 +        	Shaders.useProgram(Shaders.ProgramTexturedLit);
 +        
-+        
++    	renderVRGuiElements(translucentSecondPass, partialTicks);
++    	
 +        boolean menuHands = KeyboardHandler.Showing && mc.vrSettings.physicalKeyboard;
 +        
 +        if (!menuHands && shouldRenderHands()) 
 +            	renderVRHands(false, partialTicks);
-+
-+    	renderVRGuiElements(translucentSecondPass, partialTicks);
 +
 +    	if (menuHands) 
 +    		renderMainMenuHands(partialTicks);

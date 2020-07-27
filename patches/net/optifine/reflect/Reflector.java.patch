@@ -78,7 +78,7 @@
  import net.minecraft.world.server.ServerWorld;
  import net.optifine.Log;
  import net.optifine.util.ArrayUtils;
-@@ -1350,4 +1380,154 @@
+@@ -1350,4 +1380,158 @@
          ReflectorResolver.register(iresolvable);
          return true;
      }
@@ -96,6 +96,10 @@
 +    public static ReflectorConstructor ParticleFactoryRegisterEvent_Constructor= new ReflectorConstructor(ParticleFactoryRegisterEvent, new Class[] {}); 
 +    public static ReflectorClass ForgeIngameGui = new ReflectorClass("net.minecraftforge.client.gui.ForgeIngameGui");
 +    public static ReflectorConstructor ForgeIngameGui_Constructor= new ReflectorConstructor(ForgeIngameGui, new Class[] {Minecraft.class});
++    public static ReflectorField ForgeIngameGui_renderVignette = new ReflectorField(ForgeIngameGui, "renderVignette");
++    public static ReflectorField ForgeIngameGui_renderHelmet = new ReflectorField(ForgeIngameGui, "renderHelmet");
++    public static ReflectorField ForgeIngameGui_renderPortal = new ReflectorField(ForgeIngameGui, "renderPortal");
++    public static ReflectorField ForgeIngameGui_renderCrosshairs = new ReflectorField(ForgeIngameGui, "renderCrosshairs");
 +    public static ReflectorClass ForgeItem = new ReflectorClass(Item.class);
 +    public static ReflectorMethod ForgeItem_getTags = new ReflectorMethod(ForgeItem, "getTags");
 +    public static ReflectorMethod ServerLifecycleHooks_handleExit = new ReflectorMethod(ServerLifecycleHooks, "handleExit", new Class[] {Integer.TYPE});

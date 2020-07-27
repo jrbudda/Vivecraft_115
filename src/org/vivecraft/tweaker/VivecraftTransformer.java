@@ -5,9 +5,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -16,11 +19,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.FieldNode;
+import org.objectweb.asm.tree.MethodNode;
 
+import cpw.mods.modlauncher.TransformerHolder;
 import cpw.mods.modlauncher.api.ITransformer;
+import cpw.mods.modlauncher.api.ITransformerActivity;
 import cpw.mods.modlauncher.api.ITransformerVotingContext;
 import cpw.mods.modlauncher.api.TransformerVoteResult;
 import optifine.AccessFixer;
+import optifine.OptiFineTransformer;
 import optifine.Utils;
 
 public class VivecraftTransformer implements ITransformer<ClassNode>
@@ -28,18 +36,30 @@ public class VivecraftTransformer implements ITransformer<ClassNode>
     private static final Logger LOGGER = LogManager.getLogger();
     private ZipFile ZipFile;
 
-    private List<String> exclusions = Arrays.asList(new String[]{"net/minecraft/item/Item", "net/minecraft/item/Item$Properties"});
+    public List<ITransformer> undeadClassTransformers = new ArrayList<ITransformer>();
+    public List<ITransformer> lostMethodTransformers = new ArrayList<ITransformer>();
+    public List<ITransformer> fieldTransformersOftheDamned  = new ArrayList<ITransformer>();
+    public Set<Target> ofTargets = null;
+    
+    private List<String> exclusions = Arrays.asList(
+            "net/minecraft/item/Item",
+            "net/minecraft/item/Item$Properties",
+            "net/minecraft/client/gui/screen/inventory/ContainerScreen",
+            "net/minecraft/client/gui/screen/inventory/CreativeScreen"
+    );
     
     public VivecraftTransformer(ZipFile ZipFile)
     {
         this.ZipFile = ZipFile;
     }
 
+    @Override
     public TransformerVoteResult castVote(ITransformerVotingContext context)
     {
         return TransformerVoteResult.YES;
     }
 
+    @Override
     public Set<Target> targets()
     {
         Set<Target> set = new HashSet<>();
@@ -55,17 +75,16 @@ public class VivecraftTransformer implements ITransformer<ClassNode>
         		continue;
             set.add(target);
         }
-
+        set.addAll(ofTargets);
         LOGGER.info("Targets: " + set.size());
         return set;
     }
 
+    @Override
     public ClassNode transform(ClassNode input, ITransformerVotingContext context)
     {
         ClassNode classnode = input;
         String s = context.getClassName();
-    	System.out.println("Vivecraft Transform " + s);
-
         String s1 = s.replace('.', '/');
         byte[] abyte = this.getResourceBytes("srg/" + s1 + ".clsrg");
 
@@ -73,7 +92,12 @@ public class VivecraftTransformer implements ITransformer<ClassNode>
         {
             InputStream inputstream = new ByteArrayInputStream(abyte);
             ClassNode classnode1 = this.loadClass(inputstream);
-        	System.out.println("Vivecraft Replacing " + s);
+        	System.out.println("Vivecraft Replacing " + s + " History ... ");
+			ITransformerActivity a;
+
+        	for (ITransformerActivity act : context.getAuditActivities()){
+        	  	System.out.println("... " + act.getActivityString());
+        	}
 
             if (classnode1 != null)
             {
@@ -83,6 +107,51 @@ public class VivecraftTransformer implements ITransformer<ClassNode>
             }
         }
 
+        for(ITransformer<ClassNode> it: undeadClassTransformers) {
+        	TransformerHolder<ClassNode> t = (TransformerHolder<ClassNode>) it;
+        	if(t.owner().name().contains("OptiFine")) //NOT U
+        		continue;
+        	if(t.owner().name().contains("Vivecraft")) //NOT U EITHER *not needed*
+        		continue;
+        	for(Target target: t.targets()) {
+        		if(target.getClassName().equals(context.getClassName())) {
+        			classnode = t.transform(classnode, context);
+            	  	System.out.println("ARISE! " + target.getClassName() + " " + target.getElementName() + " " + target.getElementDescriptor());
+        		}
+        	}
+        }
+        
+    	List<MethodNode> ms = new ArrayList<>();
+    	for (MethodNode n: (List<MethodNode>)classnode.methods) {
+	        for(ITransformer<MethodNode> t: lostMethodTransformers) {
+	        		for(Target target: t.targets()) {
+			        	if(target.getClassName().equals(context.getClassName() ) && 
+			        			target.getElementName().equals(n.name) && 
+			        			target.getElementDescriptor().equals(n.desc)){    		
+		            	  	System.out.println("ARISE! " + target.getClassName() + " " + target.getElementName() + " " + target.getElementDescriptor());
+			        		n = t.transform(n, context);
+			        	}
+	        		}        
+	        	}
+			ms.add(n);
+        }
+    	classnode.methods = ms;
+    	
+    	List<FieldNode> fs = new ArrayList<>();
+    	for (FieldNode f: (List<FieldNode>)classnode.fields) {
+    		for(ITransformer<FieldNode> t: fieldTransformersOftheDamned) {
+    			for(Target target: t.targets()) {
+    				if(target.getClassName().equals(context.getClassName() ) && 
+    						target.getElementName().equals(f.name)){  
+	            	  	System.out.println("ARISE! " + target.getClassName() + " " + target.getElementName() + " " + target.getElementDescriptor());
+    					f = t.transform(f, context);
+    				}
+    			}
+    		}
+			fs.add(f);
+    	}
+    	classnode.fields = fs;
+    	
         return classnode;
     }
 

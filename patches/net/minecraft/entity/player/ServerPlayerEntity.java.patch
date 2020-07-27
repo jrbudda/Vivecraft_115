@@ -267,7 +267,7 @@
 +        //Copy over a section of the Entity Data from the old player.
 +        //Allows mods to specify data that persists after players respawn.       
 +        CompoundNBT old = (CompoundNBT)Reflector.call(that, Reflector.Entity_getPersistentData);
-+		if (old.contains("PlayerPersisted")) {
++		if (old!=null && old.contains("PlayerPersisted")) {
 +			((CompoundNBT)Reflector.call(this, Reflector.Entity_getPersistentData)).put("PlayerPersisted", old.getCompound("PlayerPersisted"));
 +		}
 +		Reflector.callVoid(Reflector.ForgeEventFactory_onPlayerClone, this, that, !keepEverything);

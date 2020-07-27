@@ -62,7 +62,7 @@ public class Installer extends JPanel  implements PropertyChangeListener
     private static final String OF_FILE_NAME      = "1.15.2_HD_U_G1_pre15";
     private static final String OF_MD5            = "0127f841a34f112b20889ccf81063adf";
     private static final String OF_VERSION_EXT    = ".jar";
-    private static String FORGE_VERSION     = "31.1.63";
+    private static String FORGE_VERSION     = "31.2.31";
 	/* END OF DO NOT RENAME */
 
 	private static final String DEFAULT_PROFILE_NAME = "Vivecraft " + MINECRAFT_VERSION;
@@ -1629,7 +1629,7 @@ public class Installer extends JPanel  implements PropertyChangeListener
 		ramAllocation.setEnabled(createProfile.isSelected());
 		txtCustomForgeVersion.setEnabled(optCustomForgeVersion.isSelected());
 		txtCustomForgeVersion.setVisible(useForge.isSelected());
-		optCustomForgeVersion.setVisible(false);
+		optCustomForgeVersion.setVisible(useForge.isSelected());
 		this.revalidate();		
 	}
 

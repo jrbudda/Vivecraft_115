@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import org.vivecraft.settings.AutoCalibration;
 import org.vivecraft.utils.math.Quaternion;
 import org.vivecraft.utils.math.Vector3;
 
@@ -19,9 +20,8 @@ public class ServerVivePlayer {
 	public byte[] controller1data;
 	public byte[] draw;
 	public float worldScale = 1.0f;
-	public float height =defaultHeight;
+	public float heightscale = 1.0f;
 	public byte activeHand = 0;
-	public static final float defaultHeight =1.65f;
 
 	boolean isTeleportMode;
 	boolean isReverseHands;
@@ -222,7 +222,7 @@ public class ServerVivePlayer {
 		pb.writeBytes(controller0data);
 		pb.writeBytes(controller1data);
 		pb.writeFloat(worldScale);
-		pb.writeFloat(height);
+		pb.writeFloat(heightscale);
 
 		return pb.array();
 	}

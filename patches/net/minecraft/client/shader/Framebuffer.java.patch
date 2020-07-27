@@ -26,7 +26,7 @@
 -
 +    //Vivecraft
 +    public static final int NO_TEXTURE_ID = -1;
-+ 	private boolean depthisTex;
++ 	private boolean depthisTex = true;
 + 	private int texid = NO_TEXTURE_ID;
 + 	private String name = "Default";
 + 	private boolean linearFilter;
@@ -39,7 +39,7 @@
 +    	//
 +    	this.name = name;
 +    	this.texid = texid;
-+    	this.depthisTex = depthtex;
++    	this.depthisTex = true; //its fine. 1.16 switched.
 +    	this.linearFilter = linearFilter;
 +    	//
 +        this.useDepth = usedepth;
@@ -271,7 +271,7 @@
      }
  
      public void framebufferClear(boolean onMac)
-@@ -307,4 +399,26 @@
+@@ -307,4 +399,48 @@
          GlStateManager.clear(i, onMac);
          this.unbindFramebuffer();
      }
@@ -297,4 +297,26 @@
 +        return sb.toString();
 +    }
 +    
++    
++    //Forge
++        private boolean stencilEnabled = true;
++        /**
++         * Attempts to enable 8 bits of stencil buffer on this FrameBuffer.
++         * Modders must call this directly to set things up.
++         * This is to prevent the default cause where graphics cards do not support stencil bits.
++         * <b>Make sure to call this on the main render thread!</b>
++         */
++        public void enableStencil()
++        {
++        	//Vivecraft noop
++        }
++    
++        /**
++         * Returns wither or not this FBO has been successfully initialized with stencil bits.
++         * If not, and a modder wishes it to be, they must call enableStencil.
++         */
++        public boolean isStencilEnabled()
++        {
++            return true;
++        }
  }

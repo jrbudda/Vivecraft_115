@@ -10,14 +10,12 @@
  import net.minecraft.client.Minecraft;
  import net.minecraft.client.entity.player.ClientPlayerEntity;
  import net.minecraft.client.gui.DisplayEffectsScreen;
-@@ -452,7 +455,11 @@
- 
+@@ -453,6 +456,10 @@
              (this.container).itemList.addAll(isearchtree.search(s.toLowerCase(Locale.ROOT)));
          }
--
-+        
-+        //VIVECRAFT idk what this is for anymore.
-+        ASMDelegator.addCreativeSearch(this.searchField.getText(), (this.container).itemList);
+ 
++        // VIVECRAFT: Add custom items to creative menu search
++        ASMDelegator.addCreativeSearch(this.searchField.getText(), this.container.itemList);
 +        //
 +        
          this.currentScroll = 0.0F;
@@ -27,8 +25,8 @@
          else if (tab != ItemGroup.SEARCH)
          {
              tab.fill((this.container).itemList);
-+            //VIVECRAFT - what is this even
-+            ASMDelegator.addCreativeItems(tab, container.itemList);
++            //VIVECRAFT: Add custom items to creative menu tabs
++            ASMDelegator.addCreativeItems(tab, this.container.itemList);
 +            //
          }
  

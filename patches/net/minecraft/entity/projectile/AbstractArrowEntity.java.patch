@@ -109,7 +109,7 @@
 -                if (raytraceresult != null && !flag)
 +                //Forge
 +                boolean f = true;
-+                if(Reflector.ForgeEventFactory_onProjectileImpactA.exists())
++                if(raytraceresult !=null && Reflector.ForgeEventFactory_onProjectileImpactA.exists())
 +                	f = raytraceresult.getType() != RayTraceResult.Type.MISS && !Reflector.callBoolean(Reflector.ForgeEventFactory_onProjectileImpactA, this, raytraceresult);
 +
 +                if (raytraceresult != null && !flag && f)

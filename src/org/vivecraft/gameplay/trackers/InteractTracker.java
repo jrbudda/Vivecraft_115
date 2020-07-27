@@ -81,13 +81,13 @@ public class InteractTracker extends Tracker{
 				try { // constructor throws an exception if method doesn't exist
 					ReflectionMethod r = new MCReflection.ReflectionMethod(c, MCReflection.BlockState_OnBlockActivated, BlockState.class, World.class, BlockPos.class, PlayerEntity.class, Hand.class, BlockRayTraceResult.class);
 					rightClickable.add(c);
-				} catch (Exception e) {
+				} catch (Throwable e) {
 				}
 				c = c.getSuperclass();
 				try {
 					ReflectionMethod r = new MCReflection.ReflectionMethod(c, MCReflection.BlockState_OnBlockActivated, BlockState.class, World.class, BlockPos.class, PlayerEntity.class, Hand.class, BlockRayTraceResult.class);
 					rightClickable.add(c);
-				} catch (Exception e) {
+				} catch (Throwable e) {
 				}
 			}
 			rightClickable.remove(Block.class);

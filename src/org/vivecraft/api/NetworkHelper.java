@@ -117,7 +117,7 @@ public class NetworkHelper {
 
 		if (userheight != heightlast) {
 			ByteBuf payload = Unpooled.buffer();
-			payload.writeFloat(userheight);
+			payload.writeFloat(userheight / AutoCalibration.defaultHeight);
 			byte[] out = new byte[payload.readableBytes()];
 			payload.readBytes(out);
 			CCustomPayloadPacket pack = getVivecraftClientPacket(PacketDiscriminators.HEIGHT,out);
@@ -177,7 +177,7 @@ public class NetworkHelper {
 			Minecraft.getInstance().getConnection().sendPacket(pack);
 		}
 		
-		PlayerModelController.getInstance().Update(Minecraft.getInstance().player.getGameProfile().getId(), a, b, c, worldScale, userheight / ServerVivePlayer.defaultHeight, true);
+		PlayerModelController.getInstance().Update(Minecraft.getInstance().player.getGameProfile().getId(), a, b, c, worldScale, userheight / AutoCalibration.defaultHeight, true);
 
 	}
 	

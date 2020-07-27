@@ -18,7 +18,7 @@
  import net.minecraft.util.text.TranslationTextComponent;
  import net.minecraft.world.Explosion;
  import net.minecraft.world.GameType;
-@@ -299,8 +303,19 @@
+@@ -299,8 +303,20 @@
  import net.minecraft.world.dimension.DimensionType;
  import net.minecraft.world.lighting.WorldLightManager;
  import net.minecraft.world.storage.MapData;
@@ -34,11 +34,12 @@
 +import org.vivecraft.gameplay.OpenVRPlayer;
 +import org.vivecraft.provider.MCOpenVR;
 +import org.vivecraft.render.PlayerModelController;
++import org.vivecraft.settings.AutoCalibration;
 +import org.vivecraft.settings.VRSettings;
  
  public class ClientPlayNetHandler implements IClientPlayNetHandler
  {
-@@ -330,6 +345,9 @@
+@@ -330,6 +346,9 @@
          this.profile = p_i1817_4_;
          this.advancementManager = new ClientAdvancementManager(p_i1817_1_);
          this.clientSuggestionProvider = new ClientSuggestionProvider(this, p_i1817_1_);
@@ -48,7 +49,7 @@
      }
  
      public ClientSuggestionProvider getSuggestionProvider()
-@@ -368,9 +386,14 @@
+@@ -368,9 +387,14 @@
  
          this.client.debugRenderer.clear();
          this.client.player.preparePlayerToSpawn();
@@ -64,7 +65,7 @@
          this.client.playerController.setPlayerCapabilities(this.client.player);
          this.client.renderViewEntity = this.client.player;
          this.client.player.dimension = packetIn.getDimension();
-@@ -379,9 +402,15 @@
+@@ -379,9 +403,15 @@
          this.client.player.setReducedDebug(packetIn.isReducedDebugInfo());
          this.client.player.setShowDeathScreen(packetIn.func_229743_k_());
          this.client.playerController.setGameType(packetIn.getGameType());
@@ -80,7 +81,7 @@
      }
  
      public void handleSpawnObject(SSpawnObjectPacket packetIn)
-@@ -872,6 +901,9 @@
+@@ -872,6 +902,9 @@
  
              if (tileentity != null)
              {
@@ -90,7 +91,7 @@
                  tileentity.read(compoundnbt);
              }
          }
-@@ -904,6 +936,11 @@
+@@ -904,6 +937,11 @@
      public void handleDisconnect(SDisconnectPacket packetIn)
      {
          this.netManager.closeChannel(packetIn.getReason());
@@ -102,7 +103,7 @@
      }
  
      public void onDisconnect(ITextComponent reason)
-@@ -966,8 +1003,36 @@
+@@ -966,8 +1004,36 @@
  
      public void handleChat(SChatPacket packetIn)
      {
@@ -141,7 +142,7 @@
      }
  
      public void handleAnimation(SAnimateHandPacket packetIn)
-@@ -1100,7 +1165,9 @@
+@@ -1100,7 +1166,9 @@
  
                      if (entity1 == this.client.player && !flag)
                      {
@@ -152,7 +153,7 @@
                      }
                  }
              }
-@@ -1191,6 +1258,10 @@
+@@ -1191,6 +1259,10 @@
              this.world.setScoreboard(scoreboard);
              this.client.loadWorld(this.world);
              this.client.displayGuiScreen(new DownloadTerrainScreen());
@@ -163,7 +164,7 @@
          }
  
          this.world.setInitialSpawnLocation();
-@@ -1204,11 +1275,17 @@
+@@ -1204,11 +1276,17 @@
          this.client.renderViewEntity = clientplayerentity1;
          clientplayerentity1.getDataManager().setEntryValues(clientplayerentity.getDataManager().getAll());
          clientplayerentity1.getAttributes().func_226303_a_(clientplayerentity.getAttributes());
@@ -182,7 +183,7 @@
          this.client.playerController.setPlayerCapabilities(clientplayerentity1);
          clientplayerentity1.setReducedDebug(clientplayerentity.hasReducedDebug());
          clientplayerentity1.setShowDeathScreen(clientplayerentity.isShowDeathScreen());
-@@ -1305,7 +1382,7 @@
+@@ -1305,7 +1383,7 @@
      {
          PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.client);
          Container container = null;
@@ -191,7 +192,7 @@
  
          if (packetIn.getWindowId() == 0)
          {
-@@ -1320,6 +1397,9 @@
+@@ -1320,6 +1398,9 @@
          {
              this.sendPacket(new CConfirmTransactionPacket(packetIn.getWindowId(), packetIn.getActionNumber(), true));
          }
@@ -201,7 +202,7 @@
      }
  
      public void handleWindowItems(SWindowItemsPacket packetIn)
-@@ -1364,6 +1444,14 @@
+@@ -1364,6 +1445,14 @@
              if (i == 1 && tileentity instanceof MobSpawnerTileEntity || flag || i == 3 && tileentity instanceof BeaconTileEntity || i == 4 && tileentity instanceof SkullTileEntity || i == 6 && tileentity instanceof BannerTileEntity || i == 7 && tileentity instanceof StructureBlockTileEntity || i == 8 && tileentity instanceof EndGatewayTileEntity || i == 9 && tileentity instanceof SignTileEntity || i == 11 && tileentity instanceof BedTileEntity || i == 5 && tileentity instanceof ConduitTileEntity || i == 12 && tileentity instanceof JigsawTileEntity || i == 13 && tileentity instanceof CampfireTileEntity || i == 14 && tileentity instanceof BeehiveTileEntity)
              {
                  tileentity.read(packetIn.getNbtCompound());
@@ -216,7 +217,7 @@
              }
  
              if (flag && this.client.currentScreen instanceof CommandBlockScreen)
-@@ -1599,6 +1687,9 @@
+@@ -1599,6 +1688,9 @@
          clientrecipebook.rebuildTable();
          clientrecipebook.getRecipes().forEach(imutablesearchtree::func_217872_a);
          imutablesearchtree.recalculate();
@@ -226,7 +227,7 @@
      }
  
      public void handlePlayerLook(SPlayerLookPacket packetIn)
-@@ -1702,7 +1793,7 @@
+@@ -1702,7 +1794,7 @@
  
          if (entity instanceof LivingEntity)
          {
@@ -235,7 +236,7 @@
  
              if (effect != null)
              {
-@@ -1727,6 +1818,9 @@
+@@ -1727,6 +1819,9 @@
          }
  
          this.client.getSearchTree(SearchTreeManager.TAGS).recalculate();
@@ -245,7 +246,7 @@
      }
  
      public void handleCombatEvent(SCombatPacket packetIn)
-@@ -2081,7 +2175,7 @@
+@@ -2081,7 +2176,7 @@
          PacketThreadUtil.checkThreadAndEnqueue(packetIn, this, this.client);
          ResourceLocation resourcelocation = packetIn.getChannelName();
          PacketBuffer packetbuffer = null;
@@ -254,7 +255,7 @@
          try
          {
              packetbuffer = packetIn.getBufferData();
-@@ -2344,14 +2438,117 @@
+@@ -2344,14 +2439,119 @@
                  int l5 = packetbuffer.readInt();
                  this.client.debugRenderer.field_229018_q_.func_229022_a_(blockpos7, l3, s10, l5);
              }
@@ -273,6 +274,8 @@
 +    					this.client.vrPlayer.setTeleportSupported(true);
 +    					this.client.vrPlayer.teleportWarningTimer = -1;
 +    					this.client.printChatMessage("Vivecraft server mod detected: " +  v);
++    					if(Minecraft.getInstance().vrSettings.manualCalibration == -1 && ! Minecraft.getInstance().vrSettings.seated)
++    						this.client.printChatMessage("Please calibrate your height in the pause menu.");
 +    					break;
 +    				case REQUESTDATA:
 +    					NetworkHelper.serverWantsData = true;
@@ -304,14 +307,14 @@
 +    					packetbuffer.readBytes(29).getBytes(0, c1);
 +    					UUID u = new UUID(hi, low);
 +
-+    					float scale = 1f;
-+    					float height = ServerVivePlayer.defaultHeight;
++    					float worldscale = 1f;
++    					float heightscale = 1f;
 +    					if (packetbuffer.isReadable())
-+    						scale = packetbuffer.readFloat();
++    						worldscale = packetbuffer.readFloat();
 +    					if (packetbuffer.isReadable())
-+    						height = packetbuffer.readFloat();		
++    						heightscale = packetbuffer.readFloat();		
 +
-+    					PlayerModelController.getInstance().Update(u, hmd, c0, c1, scale, height / ServerVivePlayer.defaultHeight);    
++    					PlayerModelController.getInstance().Update(u, hmd, c0, c1, worldscale, heightscale);    
 +    						
 +    					break;
 +    				case SETTING_OVERRIDE:
@@ -374,7 +377,7 @@
              {
                  packetbuffer.release();
              }
-@@ -2536,7 +2733,7 @@
+@@ -2536,7 +2736,7 @@
  
                      if (iattributeinstance == null)
                      {
@@ -383,7 +386,7 @@
                      }
  
                      iattributeinstance.setBaseValue(sentitypropertiespacket$snapshot.getBaseValue());
-@@ -2699,4 +2896,14 @@
+@@ -2699,4 +2899,14 @@
      {
          return this.sessionId;
      }

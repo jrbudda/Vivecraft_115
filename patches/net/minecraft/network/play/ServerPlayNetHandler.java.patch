@@ -221,7 +221,7 @@
 +    		case HEIGHT:
 +            	rawdata.resetReaderIndex();
 +            	rawdata.readByte();
-+    			vp.height = rawdata.readFloat();
++    			vp.heightscale = rawdata.readFloat();
 +    			break;			
 +    		case TELEPORT:
 +            	rawdata.resetReaderIndex();
