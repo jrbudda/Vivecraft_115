@@ -725,7 +725,7 @@
              matrixstack.scale(f7, -f7, f7);
              matrixstack.rotate(Vector3f.YP.rotationDegrees(900.0F * MathHelper.abs(MathHelper.sin(f4))));
              matrixstack.rotate(Vector3f.XP.rotationDegrees(6.0F * MathHelper.cos(f * 8.0F)));
-@@ -1317,4 +1347,2345 @@
+@@ -1317,4 +1347,2347 @@
      {
          return this.overlayTexture;
      }
@@ -2650,8 +2650,10 @@
 +    	MatrixStack mat = new MatrixStack();
 +    	mat.getLast().getMatrix().setIdentity();
 +    	applyVRModelView(mc.currentPass, mat);
-+
++    	
++    	mc.getItemRenderer().ismainhand = true;
 +    	this.renderVRHand_Main(mat, partialTicks);
++    	mc.getItemRenderer().ismainhand = false;
 +    	this.renderVRHand_Offhand(partialTicks, !translucentSecondPass, mat);
 +
 +    	this.mc.getProfiler().endSection();

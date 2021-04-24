@@ -440,18 +440,17 @@ public class OpenVRStereoRenderer
 	public void setupRenderConfiguration() throws Exception 
 	{
 		Minecraft mc = Minecraft.getInstance();
-		boolean changeNonDestructiveRenderConfig = false;
 
 		if (clipPlanesChanged())
 		{
 			reinitFrameBuffers("Clip Planes Changed");
 		}
-	
-//		if (lastGuiScale != mc.gameSettings.guiScale)
-//		{
-//			lastGuiScale = mc.gameSettings.guiScale;
-//			reinitFrameBuffers("GUI Scale Changed");
-//		}
+
+		//		if (lastGuiScale != mc.gameSettings.guiScale)
+		//		{
+		//			lastGuiScale = mc.gameSettings.guiScale;
+		//			reinitFrameBuffers("GUI Scale Changed");
+		//		}
 
 		// Check for changes in window handle
 		if (mc.getMainWindow().getHandle() != lastWindow)
@@ -464,7 +463,7 @@ public class OpenVRStereoRenderer
 			reinitFrameBuffers("VSync Changed");
 			lastEnableVsync = mc.gameSettings.vsync;
 		}
-		
+
 		if (lastMirror != mc.vrSettings.displayMirrorMode) {
 			reinitFrameBuffers("Mirror Changed");
 			lastMirror = mc.vrSettings.displayMirrorMode;
@@ -478,20 +477,20 @@ public class OpenVRStereoRenderer
 
 			int displayFBWidth = (mc.getMainWindow().getWidth() < 1) ? 1 : mc.getMainWindow().getWidth();
 			int displayFBHeight = (mc.getMainWindow().getHeight()  < 1) ? 1 : mc.getMainWindow().getHeight();
-				
+
 			int eyew, eyeh;
-			
+
 			eyew = displayFBWidth;
 			eyeh = displayFBHeight;
-			
+
 			if (Config.openGlRenderer.toLowerCase().contains("intel")) {
 				throw new RenderConfigException("Incompatible", "Intel Integrated Grpahics are not supported. If this is a laptop, please force the high-performance GPU. Detected GPU: " + Config.openGlRenderer);
 			}
-			
+
 			if (!isInitialized()) {
 				throw new RenderConfigException(RENDER_SETUP_FAILURE_MESSAGE + getName(), " " + getinitError());
 			}		
-			
+
 			Tuple<Integer, Integer> renderTextureInfo = getRenderTextureSizes();
 
 			eyew  = renderTextureInfo.getA();
@@ -512,23 +511,23 @@ public class OpenVRStereoRenderer
 				framebufferUndistorted = null;
 			}
 
-			if (framebufferEye0 != null) {
-				framebufferEye0.deleteFramebuffer();
-				framebufferEye0 = null;
-			}
-			
-			if (framebufferEye1 != null) {
-				framebufferEye1.deleteFramebuffer();
-				framebufferEye1 = null;
-			}
-			
-			deleteRenderTextures(); ///TODO should this do something.. ?
+			//			if (framebufferEye0 != null) {
+			//				framebufferEye0.deleteFramebuffer();
+			//				framebufferEye0 = null;
+			//			}
+			//			
+			//			if (framebufferEye1 != null) {
+			//				framebufferEye1.deleteFramebuffer();
+			//				framebufferEye1 = null;
+			//			}
+
+			//deleteRenderTextures(); 
 
 			if (GuiHandler.guiFramebuffer != null) {
 				GuiHandler.guiFramebuffer.deleteFramebuffer();
 				GuiHandler.guiFramebuffer = null;
 			}
-			
+
 			if (KeyboardHandler.Framebuffer != null) {
 				KeyboardHandler.Framebuffer.deleteFramebuffer();
 				KeyboardHandler.Framebuffer = null;
@@ -556,50 +555,55 @@ public class OpenVRStereoRenderer
 				fsaaFirstPassResultFBO.deleteFramebuffer();
 				fsaaFirstPassResultFBO = null;
 			}
-		
+
 			if (fsaaLastPassResultFBO != null) {
 				fsaaLastPassResultFBO.deleteFramebuffer();
 				fsaaLastPassResultFBO = null;
 			}
-			
+
 			int multiSampleCount = 0;
 			boolean multiSample = (multiSampleCount > 0 ? true : false);
-					
+
 			checkGLError("Mirror framebuffer setup");
 
-			createRenderTexture(
-					eyew,
-					eyeh);
+			if(framebufferEye0 == null) {
+				checkGLError("Render Texture setup");
 
-			if (LeftEyeTextureId == -1) {
-				throw new RenderConfigException(RENDER_SETUP_FAILURE_MESSAGE + getName(), getLastError());
+				createRenderTexture(
+						eyew,
+						eyeh);
+
+				if (LeftEyeTextureId == -1) {
+					throw new RenderConfigException(RENDER_SETUP_FAILURE_MESSAGE + getName(), getLastError());
+				}
+				mc.print("L Render texture resolution: " + eyew + " x " + eyeh);
+				mc.print("Provider supplied render texture IDs:\n" + LeftEyeTextureId + " " + RightEyeTextureId);
+
+				framebufferEye0 = new Framebuffer("L Eye", eyew, eyeh, false, false, LeftEyeTextureId, false, true);
+				mc.print(framebufferEye0.toString());
+				checkGLError("Left Eye framebuffer setup");
 			}
-			mc.print("L Render texture resolution: " + eyew + " x " + eyeh);
-			mc.print("Provider supplied render texture IDs:\n" + LeftEyeTextureId + " " + RightEyeTextureId);
 
-			checkGLError("Render Texture setup");
-				
-			framebufferEye0 = new Framebuffer("L Eye", eyew, eyeh, false, false, LeftEyeTextureId, false, true);
-			mc.print(framebufferEye0.toString());
-			checkGLError("Left Eye framebuffer setup");
-			
-			framebufferEye1 = new Framebuffer("R Eye", eyew, eyeh, false, false, RightEyeTextureId, false, true);
-			mc.print(framebufferEye1.toString());
-			checkGLError("Right Eye framebuffer setup");
-			
-		//	MCOpenVR.texType0.depth.handle = Pointer.createConstant(framebufferEye0.depthBuffer);	
-		//	MCOpenVR.texType1.depth.handle = Pointer.createConstant(framebufferEye1.depthBuffer);	
+			if(framebufferEye1 == null) {
+				framebufferEye1 = new Framebuffer("R Eye", eyew, eyeh, false, false, RightEyeTextureId, false, true);
+				mc.print(framebufferEye1.toString());
+				checkGLError("Right Eye framebuffer setup");
+			}
+
+
+			//	MCOpenVR.texType0.depth.handle = Pointer.createConstant(framebufferEye0.depthBuffer);	
+			//	MCOpenVR.texType1.depth.handle = Pointer.createConstant(framebufferEye1.depthBuffer);	
 			this.renderScale = (float) Math.sqrt((mc.vrSettings.renderScaleFactor));
 			displayFBWidth = (int) Math.ceil(eyew * renderScale);
 			displayFBHeight = (int) Math.ceil(eyeh * renderScale);
-			
+
 			framebufferVrRender = new Framebuffer("3D Render", displayFBWidth , displayFBHeight, true, false, Framebuffer.NO_TEXTURE_ID, true, true);
 			mc.print(framebufferVrRender.toString());
 			checkGLError("3D framebuffer setup");
-			
+
 			mirrorFBWidth = mc.getMainWindow().getWidth();
 			mirrorFBHeight = mc.getMainWindow().getHeight();
-			
+
 			if (mc.vrSettings.displayMirrorMode == VRSettings.MIRROR_MIXED_REALITY) {
 				mirrorFBWidth = mc.getMainWindow().getWidth() / 2;
 				if(mc.vrSettings.mixedRealityUnityLike)
@@ -617,19 +621,19 @@ public class OpenVRStereoRenderer
 			for (RenderPass renderPass : renderPasses) {
 				System.out.println("Passes: " + renderPass.toString());
 			}
-			
+
 			if (renderPasses.contains(RenderPass.THIRD)) {
 				framebufferMR = new Framebuffer("Mixed Reality Render", mirrorFBWidth, mirrorFBHeight, true, false, Framebuffer.NO_TEXTURE_ID, true, false);
 				mc.print(framebufferMR.toString());
 				checkGLError("Mixed reality framebuffer setup");
 			}
-			
+
 			if (renderPasses.contains(RenderPass.CENTER)) {
 				framebufferUndistorted = new Framebuffer("Undistorted View Render", mirrorFBWidth, mirrorFBHeight, true, false, Framebuffer.NO_TEXTURE_ID, false, false);
 				mc.print(framebufferUndistorted.toString());
 				checkGLError("Undistorted view framebuffer setup");
 			}
-			
+
 			GuiHandler.guiFramebuffer  = new Framebuffer("GUI", mc.getMainWindow().getWidth(), mc.getMainWindow().getHeight(), true, false, Framebuffer.NO_TEXTURE_ID, false, true);
 			mc.print(GuiHandler.guiFramebuffer.toString());
 			checkGLError("GUI framebuffer setup");
@@ -644,12 +648,12 @@ public class OpenVRStereoRenderer
 
 			int scopeW = 720;
 			int scopeH = 720;
-			
+
 			if(Config.isShaders()) {
 				scopeW = displayFBWidth;
 				scopeH = displayFBHeight;
 			}
-			
+
 			telescopeFramebufferR  = new Framebuffer("TelescopeR", scopeW,scopeH, true, false, Framebuffer.NO_TEXTURE_ID, true, false);
 			mc.print(telescopeFramebufferR.toString());
 			checkGLError("TelescopeR framebuffer setup");
@@ -657,9 +661,9 @@ public class OpenVRStereoRenderer
 			telescopeFramebufferL  = new Framebuffer("TelescopeL", scopeW,scopeH, true, false, Framebuffer.NO_TEXTURE_ID, true, false);
 			mc.print(telescopeFramebufferL.toString());
 			checkGLError("TelescopeL framebuffer setup");
-			
+
 			checkGLError("post color");
-			
+
 			mc.gameRenderer.setupClipPlanes();
 
 			eyeproj[0] = getProjectionMatrix(0, mc.gameRenderer.minClipDistance, mc.gameRenderer.clipDistance * 4);
@@ -679,7 +683,7 @@ public class OpenVRStereoRenderer
 					fsaaFirstPassResultFBO = new Framebuffer("FSAA Pass1 FBO",eyew, displayFBHeight,false, false, Framebuffer.NO_TEXTURE_ID, false, false);
 					//TODO: ugh, support multiple color attachments in Framebuffer....
 					fsaaLastPassResultFBO = new Framebuffer("FSAA Pass2 FBO",eyew, eyeh,false, false, Framebuffer.NO_TEXTURE_ID, false, false);
-			
+
 					mc.print(fsaaFirstPassResultFBO.toString());
 					mc.print(fsaaLastPassResultFBO.toString());
 
@@ -700,20 +704,20 @@ public class OpenVRStereoRenderer
 					return;
 				}
 			}
-			
+
 			try { //setup other shaders
 				mc.framebuffer = this.framebufferVrRender;
 				VRShaders.setupDepthMask();
 				ShaderHelper.checkGLError("init depth shader");
 				VRShaders.setupFOVReduction();
 				ShaderHelper.checkGLError("init FOV shader");		
-		        mc.worldRenderer.makeEntityOutlineShader();
-		        mc.gameRenderer.loadEntityShader(mc.getRenderViewEntity());
-		       } catch (Exception e) {
+				mc.worldRenderer.makeEntityOutlineShader();
+				mc.gameRenderer.loadEntityShader(mc.getRenderViewEntity());
+			} catch (Exception e) {
 				System.out.println(e.getMessage());
 				System.exit(-1);
 			}
-			
+
 			// Init screen size
 			if (mc.currentScreen != null)
 			{
@@ -733,16 +737,16 @@ public class OpenVRStereoRenderer
 					"\nRender target width: " + displayFBWidth + ", height: " + displayFBHeight + " [Render scale: " + Math.round(mc.vrSettings.renderScaleFactor * 100) + "%, " + String.format("%.1f", (displayFBWidth * displayFBHeight) / 1000000F) + " MP]" +
 					"\nMain window width: " + mc.getMainWindow().getWidth() + ", height: " + mc.getMainWindow().getHeight() + " [" + String.format("%.1f", mainWindowPixels / 1000000F) + " MP]" +
 					"\nTotal shaded pixels per frame: " + String.format("%.1f", pixelsPerFrame / 1000000F) + " MP (eye stencil not accounted for)"
-			);
+					);
 
 
 			//loadingScreen = new LoadingScreenRenderer(this);
-			
+
 			lastDisplayFBWidth = displayFBWidth;
 			lastDisplayFBHeight = displayFBHeight;
 			reinitFramebuffers = false;
 		}
-	
+
 	}
 
 	public List<RenderPass> getRenderPasses() {
