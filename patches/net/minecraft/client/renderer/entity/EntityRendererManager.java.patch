@@ -1,0 +1,90 @@
+--- a/net/minecraft/client/renderer/entity/EntityRendererManager.java
++++ b/net/minecraft/client/renderer/entity/EntityRendererManager.java
+@@ -7,6 +7,11 @@
+ import java.util.Collections;
+ import java.util.Map;
+ import javax.annotation.Nullable;
++
++import org.vivecraft.render.PlayerModelController;
++import org.vivecraft.render.VRPlayerRenderer;
++import org.vivecraft.render.PlayerModelController.RotInfo;
++
+ import net.minecraft.block.BlockRenderType;
+ import net.minecraft.block.BlockState;
+ import net.minecraft.client.GameSettings;
+@@ -58,6 +63,12 @@
+     private final Map<EntityType, EntityRenderer> renderers = Maps.newHashMap();
+     private final Map<String, PlayerRenderer> skinMap = Maps.newHashMap();
+     private final PlayerRenderer playerRenderer;
++	//VIVECRAFT
++	private final Map<String, VRPlayerRenderer> skinMapVR = Maps.<String, VRPlayerRenderer>newHashMap();
++	private final Map<String, VRPlayerRenderer> skinMapVRSeated = Maps.<String, VRPlayerRenderer>newHashMap();
++	private VRPlayerRenderer playerRendererVR;
++	private VRPlayerRenderer playerRendererVRSeated;
++	//
+     private final FontRenderer textRenderer;
+     public final TextureManager textureManager;
+     private World world;
+@@ -217,16 +228,52 @@
+ 
+     public <T extends Entity> EntityRenderer <? super T > getRenderer(T entityIn)
+     {
+-        if (entityIn instanceof AbstractClientPlayerEntity)
+-        {
+-            String s = ((AbstractClientPlayerEntity)entityIn).getSkinType();
+-            PlayerRenderer playerrenderer = this.skinMap.get(s);
+-            return (EntityRenderer <? super T >)(playerrenderer != null ? playerrenderer : this.playerRenderer);
+-        }
+-        else
+-        {
+-            return (EntityRenderer <? super T >)this.renderers.get(entityIn.getType());
+-        }
++    	if (entityIn instanceof AbstractClientPlayerEntity)
++    	{
++    		String s = ((AbstractClientPlayerEntity)entityIn).getSkinType();
++    		PlayerRenderer playerrenderer = this.skinMap.get(s);
++    		//VIVECRAFT
++
++    		RotInfo rotinfo = PlayerModelController.getInstance().getRotationsForPlayer(entityIn.getUniqueID());
++    		if(rotinfo!=null)
++    		{
++				Object out = null;
++    			if(rotinfo.seated)
++    			{
++    				if (this.playerRendererVRSeated == null) { // Needs to lazy load cause RenderGlobal
++    					this.playerRendererVRSeated = new VRPlayerRenderer(this, false, true);
++    					this.skinMapVRSeated.put("default", this.playerRendererVRSeated);
++    					this.skinMapVRSeated.put("slim", new VRPlayerRenderer(this, true, true));
++    				}
++    				VRPlayerRenderer renderplayervr = this.skinMapVRSeated.get(s);
++
++    				if(renderplayervr != null) 
++    					out = renderplayervr;
++    				else
++    					out = this.playerRendererVRSeated;
++
++    			} else {
++    				if (this.playerRendererVR == null) { // Needs to lazy load cause RenderGlobal
++    					this.playerRendererVR = new VRPlayerRenderer(this, false, false);
++    					this.skinMapVR.put("default", this.playerRendererVR);
++    					this.skinMapVR.put("slim", new VRPlayerRenderer(this, true, false));
++    				}
++    				VRPlayerRenderer renderplayervr = this.skinMapVR.get(s);
++    				
++    				if(renderplayervr != null) 
++    					out = renderplayervr;
++    				else
++    					out = this.playerRendererVR;
++    			}       
++    			return (EntityRenderer<? super T>) out;
++    		}  else 
++    			return (EntityRenderer <? super T >) (playerrenderer != null ? playerrenderer : this.playerRenderer);
++    		//
++    	}
++    	else
++    	{
++    		return (EntityRenderer <? super T >)this.renderers.get(entityIn.getType());
++    	}
+     }
+ 
+     public void cacheActiveRenderInfo(World worldIn, ActiveRenderInfo activeRenderInfoIn, Entity entityIn)

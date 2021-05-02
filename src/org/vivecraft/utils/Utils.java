@@ -12,21 +12,29 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.Formatter;
+import java.util.List;
+import java.util.Random;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.particle.IParticleFactory;
-import net.minecraft.client.particle.Particle;
-import net.minecraft.particles.IParticleData;
-import net.minecraft.particles.ParticleType;
+import io.github.classgraph.ClassGraph;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.ILightReader;
+import optifine.OptiFineTransformer;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.vivecraft.render.VRShaders;
 import org.vivecraft.tweaker.MinecriftClassTransformer;
@@ -45,13 +53,18 @@ import com.google.common.io.Files;
 import com.mojang.blaze3d.platform.GlStateManager;
 
 import jopenvr.HmdMatrix34_t;
+import net.minecraft.client.Minecraft;
+import net.minecraft.particles.IParticleData;
 import net.minecraft.util.math.Vec3d;
-import org.apache.commons.io.IOUtils;
 
 public class Utils
 {
 	// Magic list from a C# snippet, don't question it
 	private static final char[] illegalChars = {34, 60, 62, 124, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 58, 42, 63, 92, 47};
+	private static final int CONNECT_TIMEOUT = 5000;
+	private static final int READ_TIMEOUT = 20000;
+
+	private static URI vivecraftZipURI;
 
 	static {
 		// Needs to be sorted for binary search
@@ -420,7 +433,7 @@ public class Utils
 			
 			//Live
 			System.out.println("Unpacking " + directory + " natives...");
-			ZipFile zip = MinecriftClassTransformer.findMinecriftZipFile();
+			ZipFile zip = getVivecraftZip();
 			Enumeration<? extends ZipEntry> entries = zip.entries();
 			while (entries.hasMoreElements()) {
 				ZipEntry entry = entries.nextElement();
@@ -438,6 +451,38 @@ public class Utils
 		}
 	}
 	
+	public static URI getVivecraftZipLocation() {
+		if (vivecraftZipURI != null)
+			return vivecraftZipURI;
+
+		List<URI> uris = new ClassGraph().getClasspathURIs();
+		for (URI uri : uris) {
+			try (ZipFile zipFile = new ZipFile(new File(uri))) {
+				if (zipFile.getEntry("org/vivecraft/provider/MCOpenVR.class") != null) {
+					System.out.println("Found Vivecraft zip: " + uri.toString());
+					vivecraftZipURI = uri;
+					break;
+				}
+			} catch (IOException e) {
+			}
+		}
+
+		if (vivecraftZipURI == null)
+			throw new RuntimeException("Could not find Vivecraft zip");
+		return vivecraftZipURI;
+	}
+
+	public static ZipFile getVivecraftZip() {
+		URI uri = getVivecraftZipLocation();
+
+		try {
+			File f = new File(uri);
+			return new ZipFile(f);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 	public static void writeStreamToFile(InputStream is, File file) throws IOException {
 		FileOutputStream fos = new FileOutputStream(file);
 		byte[] buffer = new byte[4096];
@@ -452,7 +497,8 @@ public class Utils
 
 	public static String httpReadLine(String url) throws IOException {
 		HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-		conn.setReadTimeout(3000);
+		conn.setConnectTimeout(CONNECT_TIMEOUT);
+		conn.setReadTimeout(READ_TIMEOUT);
 		conn.setUseCaches(false);
 		conn.setDoInput(true);
 		BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -462,9 +508,27 @@ public class Utils
 		return line;
 	}
 
+	public static List<String> httpReadAllLines(String url) throws IOException {
+		HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+		conn.setConnectTimeout(CONNECT_TIMEOUT);
+		conn.setReadTimeout(READ_TIMEOUT);
+		conn.setUseCaches(false);
+		conn.setDoInput(true);
+		BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+		ArrayList<String> list = new ArrayList<>();
+		String line;
+		while ((line = br.readLine()) != null) {
+			list.add(line);
+		}
+		br.close();
+		conn.disconnect();
+		return list;
+	}
+
 	public static byte[] httpReadAll(String url) throws IOException {
 		HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-		conn.setReadTimeout(3000);
+		conn.setConnectTimeout(CONNECT_TIMEOUT);
+		conn.setReadTimeout(READ_TIMEOUT);
 		conn.setUseCaches(false);
 		conn.setDoInput(true);
 		InputStream is = conn.getInputStream();
@@ -485,7 +549,8 @@ public class Utils
 
 	public static void httpReadToFile(String url, File file, boolean writeWhenComplete) throws MalformedURLException, IOException {
 		HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-		conn.setReadTimeout(3000);
+		conn.setConnectTimeout(CONNECT_TIMEOUT);
+		conn.setReadTimeout(READ_TIMEOUT);
 		conn.setUseCaches(false);
 		conn.setDoInput(true);
 		InputStream is = conn.getInputStream();
@@ -520,7 +585,8 @@ public class Utils
 
 	public static List<String> httpReadList(String url) throws IOException {
 		HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-		conn.setReadTimeout(3000);
+		conn.setConnectTimeout(CONNECT_TIMEOUT);
+		conn.setReadTimeout(READ_TIMEOUT);
 		conn.setUseCaches(false);
 		conn.setDoInput(true);
 		BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -640,6 +706,16 @@ public class Utils
 				return;
 			}
 		}
+	}
+
+	public static int getCombinedLightWithMin(ILightReader lightReader, BlockPos pos, int minLight) {
+		int light = WorldRenderer.getCombinedLight(lightReader, pos);
+		int blockLight = (light >> 4) & 0xF;
+		if (blockLight < minLight) {
+			light &= 0xFFFFFF00;
+			light |= minLight << 4;
+		}
+		return light;
 	}
 
 	public static long microTime() {

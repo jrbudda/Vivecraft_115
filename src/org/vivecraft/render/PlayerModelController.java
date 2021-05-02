@@ -10,16 +10,13 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
-import org.vivecraft.api.VRData;
 import org.vivecraft.utils.Utils;
 import org.vivecraft.utils.math.Quaternion;
 import org.vivecraft.utils.math.Vector3;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -161,7 +158,10 @@ public class PlayerModelController {
 		if(heightscale > 1.5f)
 			heightscale = 1.5f;
 		
-		out.heightScale = heightscale;
+		out.heightScale =heightscale;
+		
+		if(out.seated)
+			out.heightScale = 1;
 		
 		vivePlayersReceived.put(uuid, out);
 
@@ -274,25 +274,6 @@ public class PlayerModelController {
 //		}
 //	}
 	
-	public static RotInfo getMainPlayerRotInfo(VRData data){
-			RotInfo rotInfo=new RotInfo();
-
-			Quaternion quatLeft=new Quaternion(data.getController(1).getMatrix());
-			Quaternion quatRight=new Quaternion(data.getController(0).getMatrix());
-			Quaternion quatHmd=new Quaternion(data.hmd.getMatrix());
-
-			rotInfo.headQuat=quatHmd;
-			rotInfo.leftArmQuat=quatLeft;
-			rotInfo.rightArmQuat=quatRight;
-			rotInfo.seated=Minecraft.getInstance().vrSettings.seated;
-
-			rotInfo.leftArmPos = data.getController(1).getPosition();
-			rotInfo.rightArmPos = data.getController(0).getPosition();
-			rotInfo.Headpos = data.hmd.getPosition(); 
-
-			return rotInfo;
-	}
-
 	public boolean debug = false;
 
 	public boolean isTracked(UUID uuid){

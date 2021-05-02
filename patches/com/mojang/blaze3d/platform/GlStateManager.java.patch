@@ -24,27 +24,17 @@
      @Deprecated
      public static void enableFog()
      {
-@@ -1534,7 +1540,18 @@
+@@ -1534,7 +1540,8 @@
          RenderSystem.assertThread(RenderSystem::isOnRenderThread);
          GL11.glGetFloatv(pname, params);
      }
 -
 +    
-+    //temp
-+    public static Matrix4f getMatrix4f(int p_getMatrix4f_0_)
-+    {
-+        GL11.glGetFloatv(p_getMatrix4f_0_, MATRIX_BUFFER);
-+        MATRIX_BUFFER.rewind();
-+        Matrix4f matrix4f = new Matrix4f();
-+        matrix4f.read(MATRIX_BUFFER);
-+        MATRIX_BUFFER.rewind();
-+        return matrix4f;
-+    }
 +    
      @Deprecated
      public static void ortho(double left, double right, double bottom, double top, double zNear, double zFar)
      {
-@@ -1984,7 +2001,7 @@
+@@ -1984,7 +1991,7 @@
          }
      }
  
@@ -53,7 +43,7 @@
      {
          public final GlStateManager.BooleanState blend = new GlStateManager.BooleanState(3042);
          public int srcFactorRgb = 1;
-@@ -2049,6 +2066,7 @@
+@@ -2049,6 +2056,7 @@
      }
  
      @Deprecated

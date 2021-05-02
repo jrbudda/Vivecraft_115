@@ -12,7 +12,23 @@
  import net.minecraft.advancements.CriteriaTriggers;
  import net.minecraft.block.Block;
  import net.minecraft.block.Blocks;
-@@ -85,10 +90,24 @@
+@@ -26,6 +31,7 @@
+ import net.minecraft.stats.Stats;
+ import net.minecraft.tags.FluidTags;
+ import net.minecraft.tags.ItemTags;
++import net.minecraft.util.Hand;
+ import net.minecraft.util.SoundEvents;
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.util.math.EntityRayTraceResult;
+@@ -40,6 +46,7 @@
+ import net.minecraft.world.storage.loot.LootParameters;
+ import net.minecraft.world.storage.loot.LootTable;
+ import net.minecraft.world.storage.loot.LootTables;
++import net.optifine.reflect.Reflector;
+ 
+ public class FishingBobberEntity extends Entity
+ {
+@@ -85,10 +92,28 @@
          float f3 = MathHelper.sin(-f1 * ((float)Math.PI / 180F) - (float)Math.PI);
          float f4 = -MathHelper.cos(-f * ((float)Math.PI / 180F));
          float f5 = MathHelper.sin(-f * ((float)Math.PI / 180F));
@@ -24,13 +40,17 @@
 +    	ServerVivePlayer vp = NetworkHelper.vivePlayers.get(angler.getUniqueID());
 +    	if (vp !=null && vp.isVR())
 +    	{
-+    		Vec3d aim = vp.getControllerDir(0);
-+    		Vec3d aimSource = vp.getControllerPos(0);
-+    		float pitch = (float)Math.toDegrees(Math.asin(aim.y/aim.length()));
-+    		float yaw = (float)Math.toDegrees(Math.atan2(aim.x, -aim.z));   
++    		Vec3d aim = vp.getControllerDir(vp.activeHand);
++    		Vec3d aimSource = vp.getControllerPos(vp.activeHand);
++    		float pitch = -(float)Math.toDegrees(Math.asin(aim.y/aim.length()));
++    		float yaw = (float)Math.toDegrees(Math.atan2(-aim.x, aim.z));   
 +    		this.setLocationAndAngles(aimSource.x + aim.x*0.6f, aimSource.y+aim.y*0.6f, aimSource.z+aim.z*0.6f, yaw, pitch);
 +    		f = pitch;
 +    		f1 = yaw;
++    		f2 = MathHelper.cos(-f1 * ((float)Math.PI / 180F) - (float)Math.PI);
++    		f3 = MathHelper.sin(-f1 * ((float)Math.PI / 180F) - (float)Math.PI);
++    		f4 = -MathHelper.cos(-f * ((float)Math.PI / 180F));
++    		f5 = MathHelper.sin(-f * ((float)Math.PI / 180F));
 +    	}else {
 +	        double d0 = this.angler.getPosX() - (double)f3 * 0.3D;
 +	        double d1 = this.angler.getPosYEye();
@@ -41,22 +61,109 @@
          Vec3d vec3d = new Vec3d((double)(-f3), (double)MathHelper.clamp(-(f5 / f4), -5.0F, 5.0F), (double)(-f2));
          double d3 = vec3d.length();
          vec3d = vec3d.mul(0.6D / d3 + 0.5D + this.rand.nextGaussian() * 0.0045D, 0.6D / d3 + 0.5D + this.rand.nextGaussian() * 0.0045D, 0.6D / d3 + 0.5D + this.rand.nextGaussian() * 0.0045D);
-@@ -236,6 +255,18 @@
+@@ -235,16 +260,19 @@
+             double d1 = 0.92D;
              this.setMotion(this.getMotion().scale(0.92D));
              this.recenterBoundingBox();
-         }
-+        
-+        //Vivecraft nibblehaptics
-+    	ServerVivePlayer vp = NetworkHelper.vivePlayers.get(angler.getUniqueID());
-+    	if (vp !=null && vp.isVR()) {
-+    		if(this.currentState == State.BOBBING) {
-+    			if(this.getMotion().y <= -0.24) { //server makes the bobber jump downwards on a bite.
-+                	MCOpenVR.triggerHapticPulse(0,250); //VIVECRAFT go thump.
-+    			}				
-+    		}
-+    	}
-+    	//
-+    	
+-        }
++        }  	
      }
  
      private boolean shouldStopFishing()
+     {
+         ItemStack itemstack = this.angler.getHeldItemMainhand();
+         ItemStack itemstack1 = this.angler.getHeldItemOffhand();
+-        boolean flag = itemstack.getItem() == Items.FISHING_ROD;
+-        boolean flag1 = itemstack1.getItem() == Items.FISHING_ROD;
+-
++        
++        //Forge change to instanceof check
++        boolean flag = itemstack.getItem() instanceof net.minecraft.item.FishingRodItem;
++        boolean flag1 = itemstack1.getItem() instanceof net.minecraft.item.FishingRodItem;
++        //
++        
+         if (!this.angler.removed && this.angler.isAlive() && (flag || flag1) && !(this.getDistanceSq(this.angler) > 1024.0D))
+         {
+             return false;
+@@ -356,9 +384,11 @@
+                 double d1 = (double)((float)MathHelper.floor(this.getPosY()) + 1.0F);
+                 double d2 = this.getPosZ() + (double)(f2 * (float)this.ticksCatchableDelay * 0.1F);
+                 Block block = serverworld.getBlockState(new BlockPos(d0, d1 - 1.0D, d2)).getBlock();
+-
+-                if (block == Blocks.WATER)
++                
++                //Forge change block to material check.
++                if (serverworld.getBlockState(new BlockPos((int)d0, (int)d1 - 1, (int)d2)).getMaterial() == net.minecraft.block.material.Material.WATER)
+                 {
++                //
+                     if (this.rand.nextFloat() < 0.15F)
+                     {
+                         serverworld.spawnParticle(ParticleTypes.BUBBLE, d0, d1 - (double)0.1F, d2, 1, (double)f1, 0.1D, (double)f2, 0.0D);
+@@ -408,8 +438,10 @@
+                 double d6 = this.getPosZ() + (double)(MathHelper.cos(f6) * f7 * 0.1F);
+                 Block block1 = serverworld.getBlockState(new BlockPos(d4, d5 - 1.0D, d6)).getBlock();
+ 
+-                if (block1 == Blocks.WATER)
++                //Forge change block to material check
++                if (serverworld.getBlockState(new BlockPos(d4, d5 - 1.0D, d6)).getMaterial() == net.minecraft.block.material.Material.WATER)
+                 {
++                //
+                     serverworld.spawnParticle(ParticleTypes.SPLASH, d4, d5, d6, 2 + this.rand.nextInt(2), (double)0.1F, 0.0D, (double)0.1F, 0.0D);
+                 }
+             }
+@@ -440,6 +472,7 @@
+         if (!this.world.isRemote && this.angler != null)
+         {
+             int i = 0;
++            Object event = null;
+ 
+             if (this.caughtEntity != null)
+             {
+@@ -451,8 +484,18 @@
+             else if (this.ticksCatchable > 0)
+             {
+                 LootContext.Builder lootcontext$builder = (new LootContext.Builder((ServerWorld)this.world)).withParameter(LootParameters.POSITION, new BlockPos(this)).withParameter(LootParameters.TOOL, p_146034_1_).withRandom(this.rand).withLuck((float)this.luck + this.angler.getLuck());
++                lootcontext$builder.withParameter(LootParameters.KILLER_ENTITY, this.angler).withParameter(LootParameters.THIS_ENTITY, this);
++
+                 LootTable loottable = this.world.getServer().getLootTableManager().getLootTableFromLocation(LootTables.GAMEPLAY_FISHING);
+                 List<ItemStack> list = loottable.generate(lootcontext$builder.build(LootParameterSets.FISHING));
++                //Forge
++                event = Reflector.newInstance(Reflector.ItemFishedEvent_Constructor, list, this.inGround ? 2 : 1, this);
++                Reflector.postForgeBusEvent(event);        
++                if (Reflector.callBoolean(event,  Reflector.Event_isCanceled)) {
++                   this.remove();
++                   return Reflector.callInt(event, Reflector.ItemFishedEvent_getRodDamage);
++                }
++                //
+                 CriteriaTriggers.FISHING_ROD_HOOKED.trigger((ServerPlayerEntity)this.angler, p_146034_1_, this, list);
+ 
+                 for (ItemStack itemstack : list)
+@@ -481,7 +524,7 @@
+             }
+ 
+             this.remove();
+-            return i;
++            return event == null ? i : Reflector.callInt(event, Reflector.ItemFishedEvent_getRodDamage);
+         }
+         else
+         {
+@@ -522,7 +565,18 @@
+             this.angler.fishingBobber = null;
+         }
+     }
+-
++    
++//Forge
++    public void remove(boolean keepData) {
++       this.removed = true;
++       
++       if (this.angler != null)
++       {
++           this.angler.fishingBobber = null;
++       }
++       //TODO: figure out how to call Forge's remove(boolean) on super.
++    }
++    
+     @Nullable
+     public PlayerEntity getAngler()
+     {

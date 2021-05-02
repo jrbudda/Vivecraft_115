@@ -15,6 +15,9 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.vivecraft.provider.MCOpenVR;
+import org.vivecraft.utils.Utils;
+
 import net.minecraft.launchwrapper.IClassTransformer;
 
 // With apologies to Optifine. Copyright sp614x, this is built on his work.
@@ -27,7 +30,6 @@ public class MinecriftClassTransformer implements IClassTransformer
 	private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("legacy.debugClassLoading", "false"));
 	
     private ZipFile mcZipFile = null;
-    private static URL mcZipURL = null;
     private final Stage stage;
     
     private final Map<String, byte[]> cache;
@@ -44,7 +46,7 @@ public class MinecriftClassTransformer implements IClassTransformer
     	if (stage == Stage.MAIN) {
 	        try
 	        {
-	            this.mcZipFile = findMinecriftZipFile();
+	            this.mcZipFile = Utils.getVivecraftZip();
 	        }
 	        catch (Exception var6)
 	        {
@@ -61,61 +63,6 @@ public class MinecriftClassTransformer implements IClassTransformer
     	}
     }
 
-    private static ZipFile getMinecriftZipFile(URL url)
-    {
-        try
-        {
-            URI uri = url.toURI();
-            File file = new File(uri);
-            ZipFile zipFile = new ZipFile(file);
-
-            if (zipFile.getEntry("org/vivecraft/provider/MCOpenVR.class") == null)
-            {
-                zipFile.close();
-                return null;
-            }
-            else
-            {
-                return zipFile;
-            }
-        }
-        catch (Exception var4)
-        {
-            return null;
-        }
-    }
-    
-    public static ZipFile findMinecriftZipFile() {
-    	if (mcZipURL != null) {
-    		try {
-    			return new ZipFile(new File(mcZipURL.toURI()));
-    		} catch (Exception e) {
-    			e.printStackTrace();
-    			return null;
-    		}
-    	}
-    	
-    	URLClassLoader e = (URLClassLoader)MinecriftClassTransformer.class.getClassLoader();
-        URL[] urls = e.getURLs();
-
-        for (int i = 0; i < urls.length; ++i)
-        {
-            URL url = urls[i];
-            ZipFile zipFile = getMinecriftZipFile(url);
-
-            if (zipFile != null)
-            {
-                debug("Vivecraft ClassTransformer");
-                debug("Vivecraft URL: " + url);
-                debug("Vivecraft ZIP file: " + zipFile.getName());
-                mcZipURL = url;
-                return zipFile;
-            }
-        }
-        return null;
-    }
-   
-    
     public byte[] transform(String name, String transformedName, byte[] bytes)
     {
     	switch (stage) {
@@ -132,8 +79,10 @@ public class MinecriftClassTransformer implements IClassTransformer
 		    		// Perform any additional mods using ASM
 		    		minecriftClass = performAsmModification(minecriftClass, transformedName);
 		    		
-		    		if(bytes.length != minecriftClass.length) {
-		    			debug(String.format("Vivecraft: Overwrite %s %s (%d != %d)", name, transformedName, bytes.length, minecriftClass.length));
+		    		int b = bytes == null ? 0 : bytes.length;
+		    		
+		    		if(b != minecriftClass.length) {
+		    			debug(String.format("Vivecraft: Overwrite %s %s (%d != %d)", name, transformedName, b, minecriftClass.length));
 		    			myClasses.add(transformedName);
 		    		}
 		    		//if (DEBUG) writeToFile("original", transformedName, "", bytes);

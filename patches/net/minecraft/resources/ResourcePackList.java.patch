@@ -19,18 +19,7 @@
          this.close();
          Set<String> set = this.enabled.stream().map(ResourcePackInfo::getName).collect(Collectors.toCollection(LinkedHashSet::new));
          this.packNameToInfo.clear();
-@@ -48,6 +53,10 @@
-                 t.getPriority().insert(this.enabled, t, Functions.identity(), false);
-             }
-         }
-+
-+        // Vivecraft
-+        if (!this.enabled.equals(oldEnabled))
-+            Minecraft.getInstance().resourcePacksChanged = true;
-     }
- 
-     private void sortPackNameToInfo()
-@@ -62,6 +71,9 @@
+@@ -62,6 +67,9 @@
  
      public void setEnabledPacks(Collection<T> p_198985_1_)
      {
@@ -40,14 +29,3 @@
          this.enabled.clear();
          this.enabled.addAll(p_198985_1_);
  
-@@ -72,6 +84,10 @@
-                 t.getPriority().insert(this.enabled, t, Functions.identity(), false);
-             }
-         }
-+
-+        // Vivecraft
-+        if (!this.enabled.equals(oldEnabled))
-+            Minecraft.getInstance().resourcePacksChanged = true;
-     }
- 
-     public Collection<T> getAllPacks()

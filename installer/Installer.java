@@ -35,11 +35,11 @@ public class Installer extends JPanel  implements PropertyChangeListener
 	private static final long serialVersionUID = -562178983462626162L;
 	private String tempDir = System.getProperty("java.io.tmpdir");
 
-	private static final boolean ALLOW_FORGE_INSTALL = false; 
+	private static final boolean ALLOW_FORGE_INSTALL = true; 
 	private static final boolean DEFAULT_FORGE_INSTALL = false; 
 	private static final boolean ALLOW_HYDRA_INSTALL = false; 
-	private static final boolean ALLOW_KATVR_INSTALL = true; 
-	private static final boolean ALLOW_KIOSK_INSTALL = true; 
+	private static final boolean ALLOW_KATVR_INSTALL = false; 
+	private static final boolean ALLOW_KIOSK_INSTALL = false; 
 	private static final boolean ALLOW_HRTF_INSTALL = false; 
 	private static final boolean PROMPT_REMOVE_HRTF = true; 
 	private static final boolean ALLOW_SHADERSMOD_INSTALL = false;  
@@ -59,14 +59,14 @@ public class Installer extends JPanel  implements PropertyChangeListener
     private static final String MC_VERSION        = "1.15.2";
     private static final String MC_MD5            = "1d87e7d75a99172f0cffc4f96cdc44da";
 	private static final String OF_LIB_PATH       = "libraries/optifine/OptiFine/";
-    private static final String OF_FILE_NAME      = "1.15.2_HD_U_G1";
-    private static final String OF_MD5            = "5B5956541C9D36B49A72B22FCD2C2907";
+    private static final String OF_FILE_NAME      = "1.15.2_HD_U_G1_pre15";
+    private static final String OF_MD5            = "0127f841a34f112b20889ccf81063adf";
     private static final String OF_VERSION_EXT    = ".jar";
-    private static String FORGE_VERSION     = "14.25.0.110";
+    private static String FORGE_VERSION     = "31.2.0";
 	/* END OF DO NOT RENAME */
 
-	private static final String DEFAULT_PROFILE_NAME = "Vivecraft " + MINECRAFT_VERSION;
-	private static final String DEFAULT_PROFILE_NAME_FORGE = "Vivecraft-Forge " + MINECRAFT_VERSION;
+	private static final String DEFAULT_PROFILE_NAME = "Vivecraft NonVR " + MINECRAFT_VERSION;
+	private static final String DEFAULT_PROFILE_NAME_FORGE = "Vivecraft-Forge NonVR " + MINECRAFT_VERSION;
 	private static final String HOMEPAGE_LINK = "http://www.vivecraft.org";
 	private static final String DONATION_LINK = "https://www.patreon.com/jrbudda";
     private static final String ORIG_FORGE_VERSION = FORGE_VERSION;
@@ -77,7 +77,7 @@ public class Installer extends JPanel  implements PropertyChangeListener
 	private String[] forgeVersions = null;
 	private boolean forgeVersionInstalled = false;
 	private static String FULL_FORGE_VERSION = MINECRAFT_VERSION + "-" + FORGE_VERSION;
-	private String forge_url = "https://files.minecraftforge.net/maven/net/minecraftforge/forge/" + FULL_FORGE_VERSION + "/forge-" + FULL_FORGE_VERSION + "-installer.jar";
+	private String forge_url = "https://maven.minecraftforge.net/net/minecraftforge/forge/" + FULL_FORGE_VERSION + "/forge-" + FULL_FORGE_VERSION + "-installer.jar";
 	private File forgeInstaller;
 	private JTextField selectedDirText;
 	private JLabel infoLabel;
@@ -330,8 +330,6 @@ public class Installer extends JPanel  implements PropertyChangeListener
 		ramPanel.setAlignmentY(TOP_ALIGNMENT);
 
 		Integer[] rams = {1,2,4,6,8};
-		if(!useForge.isSelected())
-				rams = new Integer[] {1,2}; //no u dont need more.
 
 		ramAllocation = new JComboBox(rams);
 		ramAllocation.setSelectedIndex(1);
@@ -476,11 +474,11 @@ public class Installer extends JPanel  implements PropertyChangeListener
 	{
 		JOptionPane optionPane = new JOptionPane(this, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, new String[]{"Install", "Cancel"});
 
-		emptyFrame = new Frame("Vivecraft Installer");
+		emptyFrame = new Frame("Vivecraft NonVR Installer");
 		emptyFrame.setUndecorated(true);
 		emptyFrame.setVisible(true);
 		emptyFrame.setLocationRelativeTo(null);
-		dialog = optionPane.createDialog(emptyFrame, "Vivecraft Installer");
+		dialog = optionPane.createDialog(emptyFrame, "Vivecraft NonVR Installer");
 		dialog.setResizable(true);
 		dialog.setSize(620,748);
 		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -687,7 +685,7 @@ public class Installer extends JPanel  implements PropertyChangeListener
 					
 				FULL_FORGE_VERSION = MINECRAFT_VERSION + "-" + FORGE_VERSION;
 				forgeInstaller = new File(tempDir + "/forge-" + FULL_FORGE_VERSION + "-installer.jar");
-				forge_url = "http://files.minecraftforge.net/maven/net/minecraftforge/forge/" + FULL_FORGE_VERSION + "/forge-" + FULL_FORGE_VERSION + "-installer.jar";
+				forge_url = "https://maven.minecraftforge.net/net/minecraftforge/forge/" + FULL_FORGE_VERSION + "/forge-" + FULL_FORGE_VERSION + "-installer.jar";
 
 				if( targetDir.exists() ) {
 					File ForgeDir = new File( targetDir, "libraries"+File.separator+"net"+File.separator+"minecraftforge"+File.separator+"forge");
@@ -1127,6 +1125,8 @@ public class Installer extends JPanel  implements PropertyChangeListener
 				InputStream version_json;
 				if(isMultiMC) {
 					String filename = "version-multimc.json";
+					if (useForge.isSelected())
+						filename = "version-multimc-forge.json";
 					version_json = Installer.class.getResourceAsStream(filename);
 				}
 				else if(useForge.isSelected() /*&& forgeVersion.getSelectedItem() != forgeNotFound*/ ) 
@@ -1208,14 +1208,14 @@ public class Installer extends JPanel  implements PropertyChangeListener
 							if(isMultiMC)
 								root.remove("id");
 							
-							if(isMultiMC && useForge.isSelected()) {
+							/*if(isMultiMC && useForge.isSelected()) {
 								JSONArray tw = (JSONArray) root.get("+tweakers");
 								tw = new JSONArray();
 								tw.put("org.vivecraft.tweaker.MinecriftForgeTweaker");
 								tw.put("net.minecraftforge.fml.common.launcher.FMLTweaker");
 								tw.put("optifine.OptiFineForgeTweaker");
 								root.put("+tweakers", tw);
-							}
+							}*/
 							
 							FileWriter fwJson = new FileWriter(fileJson);
 							fwJson.write(root.toString(jsonIndentSpaces));
@@ -1368,13 +1368,16 @@ public class Installer extends JPanel  implements PropertyChangeListener
 				}
 
 				prof.put("lastVersionId", minecriftVer + mod);
-				int minAlloc = ramAllocation.getSelectedItem() == "1" ? 1 : 2;
+				int minAlloc = ramAllocation.getSelectedItem() == Integer.valueOf(1) ? 1 : 2;
 				prof.put("javaArgs", "-Xmx" + ramAllocation.getSelectedItem() + "G -Xms" + minAlloc + "G -XX:+UseParallelGC -XX:ParallelGCThreads=3 -XX:MaxGCPauseMillis=3 -Xmn256M -Dfml.ignoreInvalidMinecraftCertificates=true -Dfml.ignorePatchDiscrepancies=true");
 				prof.put("name", profileName);
 				prof.put("icon", "Creeper_Head");
 				prof.put("type", "custom");
 				prof.put("lastUsed", dateFormat.format(new java.util.Date()));
 				if(chkCustomGameDir.isSelected() && txtCustomGameDir.getText().trim() != ""){
+					String dir = txtCustomGameDir.getText();
+					if (dir.endsWith("\\mods")) dir = dir.substring(0, dir.length()-5);
+					if (dir.endsWith("\\mods\\")) dir = dir.substring(0, dir.length()-6);
 					prof.put("gameDir", txtCustomGameDir.getText());
 				} else {
 					prof.remove("gameDir");
@@ -1571,6 +1574,7 @@ public class Installer extends JPanel  implements PropertyChangeListener
 		@Override
 		public void actionPerformed(ActionEvent e)
 		{
+			updateInstructions();
 			if (useForge.isSelected()) ramAllocation.setSelectedIndex(2);
 			else ramAllocation.setSelectedIndex(1);
 			updateInstructions();
@@ -1626,6 +1630,7 @@ public class Installer extends JPanel  implements PropertyChangeListener
 		txtCustomForgeVersion.setEnabled(optCustomForgeVersion.isSelected());
 		txtCustomForgeVersion.setVisible(useForge.isSelected());
 		optCustomForgeVersion.setVisible(useForge.isSelected());
+		this.revalidate();		
 	}
 
 	private void updateFilePath()
