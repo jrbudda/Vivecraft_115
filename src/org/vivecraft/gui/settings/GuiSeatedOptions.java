@@ -16,6 +16,8 @@ public class GuiSeatedOptions extends GuiVROptionsBase
 			new VROptionEntry(VRSettings.VrOptions.SEATED_HUD_XHAIR),
 			new VROptionEntry(VRSettings.VrOptions.WALK_UP_BLOCKS),
 			new VROptionEntry(VRSettings.VrOptions.WORLD_ROTATION_INCREMENT),
+			new VROptionEntry(VRSettings.VrOptions.DUMMY),
+			new VROptionEntry(VRSettings.VrOptions.WORLD_ROTATION_INCREMENT_MULTIPLIER),
 			new VROptionEntry(VRSettings.VrOptions.SEATED_FREE_MOVE, true),
 			new VROptionEntry(VRSettings.VrOptions.DUMMY, true),
 			new VROptionEntry("Teleport Settings...", (button, mousePos) -> {
@@ -52,6 +54,7 @@ public class GuiSeatedOptions extends GuiVROptionsBase
 		vrSettings.ySensitivity=1;
 		vrSettings.seatedHudAltMode = false;
 		vrSettings.vrWorldRotationIncrement = 45f;
+		vrSettings.vrWorldRotationIncrementMultiplier = 10;
 		vrSettings.seatedFreeMove = false;
 	}
 

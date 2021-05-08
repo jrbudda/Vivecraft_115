@@ -101,7 +101,8 @@ public class GuiMainVRSettings extends GuiVROptionsBase
         minecraft.vrSettings.vrWorldRotation = 0;
         MCOpenVR.seatedRot = 0;
         minecraft.vrSettings.vrWorldScale = 1;
-        minecraft.vrSettings.vrWorldRotationIncrement = 45f;
+		minecraft.vrSettings.vrWorldRotationIncrement = 45f;
+		minecraft.vrSettings.vrWorldRotationIncrementMultiplier = 10;
         minecraft.vrSettings.seated = false;
 		MCOpenVR.clearOffset();
     }

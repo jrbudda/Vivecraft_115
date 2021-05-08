@@ -14,6 +14,8 @@ public class GuiStandingSettings extends GuiVROptionsBase
 					new VROptionEntry(VRSettings.VrOptions.VEHICLE_ROTATION),
 					new VROptionEntry(VRSettings.VrOptions.WALK_MULTIPLIER),
 					new VROptionEntry(VRSettings.VrOptions.WORLD_ROTATION_INCREMENT),
+					new VROptionEntry(VRSettings.VrOptions.DUMMY),
+					new VROptionEntry(VRSettings.VrOptions.WORLD_ROTATION_INCREMENT_MULTIPLIER),
 					new VROptionEntry(VRSettings.VrOptions.BCB_ON),
 					new VROptionEntry(VRSettings.VrOptions.ALLOW_STANDING_ORIGIN_OFFSET),
 					new VROptionEntry(VRSettings.VrOptions.FORCE_STANDING_FREE_MOVE, true),
@@ -51,6 +53,7 @@ public class GuiStandingSettings extends GuiVROptionsBase
 		vr.vehicleRotation = true;
 		vr.walkUpBlocks = true;
 		vr.vrWorldRotationIncrement = 45f;
+		vr.vrWorldRotationIncrementMultiplier = 10;
 		vr.allowStandingOriginOffset = false;
 		vr.forceStandingFreeMove = false;
 	}
