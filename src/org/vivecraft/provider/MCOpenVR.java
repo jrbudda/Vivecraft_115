@@ -1660,7 +1660,7 @@ public class MCOpenVR
 			float ax = getAxis2D(getInputAction(keyRotateAxis)).getX();
 			if (ax == 0) ax = getAxis2D(getInputAction(keyFreeMoveRotate)).getX();
 			if (ax != 0) {
-				float analogRotSpeed = 10 * ax;
+				float analogRotSpeed = mc.vrSettings.vrWorldRotationIncrementMultiplier * ax;
 				mc.vrSettings.vrWorldRotation -= analogRotSpeed;
 				mc.vrSettings.vrWorldRotation = mc.vrSettings.vrWorldRotation % 360;
 			}
@@ -1679,7 +1679,7 @@ public class MCOpenVR
 			float ax = VivecraftMovementInput.getMovementAxisValue(keyRotateLeft);
 			if(ax > 0){
 				float analogRotSpeed = 5;
-				if(ax > 0)	analogRotSpeed= 10 * ax;
+				if(ax > 0)	analogRotSpeed= mc.vrSettings.vrWorldRotationIncrementMultiplier * ax;
 				mc.vrSettings.vrWorldRotation+=analogRotSpeed;
 				mc.vrSettings.vrWorldRotation = mc.vrSettings.vrWorldRotation % 360;
 			}
@@ -1694,7 +1694,7 @@ public class MCOpenVR
 			float ax = VivecraftMovementInput.getMovementAxisValue(keyRotateRight);
 			if(ax > 0){
 				float analogRotSpeed = 5;
-				if(ax > 0)	analogRotSpeed = 10 * ax;
+				if(ax > 0)	analogRotSpeed = mc.vrSettings.vrWorldRotationIncrementMultiplier * ax;
 				mc.vrSettings.vrWorldRotation-=analogRotSpeed;
 				mc.vrSettings.vrWorldRotation = mc.vrSettings.vrWorldRotation % 360;
 			}
