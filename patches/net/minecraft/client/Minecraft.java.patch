@@ -775,6 +775,6 @@
 +     
 +    //Vivecraft Additions
 +
-+    public final String minecriftVerString = "Vivecraft 1.15.2 jrbudda-NONVR-3-b9";
++    public final String minecriftVerString = "Vivecraft 1.15.2 jrbudda-NONVR-3-b10";
 +
  }
