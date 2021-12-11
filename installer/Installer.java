@@ -62,7 +62,7 @@ public class Installer extends JPanel  implements PropertyChangeListener
     private static final String OF_FILE_NAME      = "1.15.2_HD_U_G1_pre15";
     private static final String OF_MD5            = "0127f841a34f112b20889ccf81063adf";
     private static final String OF_VERSION_EXT    = ".jar";
-    private static String FORGE_VERSION     = "31.2.0";
+    private static String FORGE_VERSION     = "31.2.56";
 	/* END OF DO NOT RENAME */
 
 	private static final String DEFAULT_PROFILE_NAME = "Vivecraft NonVR " + MINECRAFT_VERSION;
@@ -591,8 +591,7 @@ public class Installer extends JPanel  implements PropertyChangeListener
 					}
 				}
 			}
-			catch (NoSuchFieldException e) {}
-			catch (IllegalAccessException e) {}
+			catch (Exception e) {}
 
 
 			finalMessage = "Failed: Couldn't download C++ redistributables. ";
